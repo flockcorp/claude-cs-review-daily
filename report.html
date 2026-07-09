@@ -1,0 +1,1776 @@
+<!doctype html>
+<html lang="ko"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>원룸만들기 리뷰 분석 리포트</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+<style>
+:root{--bg:#f6f7fb;--card:#fff;--ink:#1c2333;--muted:#7a8194;--line:#e7e9f0;
+--brand:#4f6ef2;--good:#22a06b;--warn:#e8a33d;--bad:#e5484d;--pb:#8b5cf6;}
+@media(prefers-color-scheme:dark){:root{--bg:#12141c;--card:#1b1e29;--ink:#eef0f6;
+--muted:#98a0b3;--line:#2a2e3c;}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);
+font-family:"Pretendard","Apple SD Gothic Neo","Malgun Gothic",system-ui,sans-serif;line-height:1.5}
+.wrap{max-width:1080px;margin:0 auto;padding:28px 18px 80px}
+header h1{margin:0 0 4px;font-size:26px}
+.sub{color:var(--muted);font-size:14px}
+.kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;margin:22px 0}
+.kpi{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:16px}
+.kpi .n{font-size:24px;font-weight:700}
+.kpi .l{color:var(--muted);font-size:13px;margin-top:2px}
+section{background:var(--card);border:1px solid var(--line);border-radius:16px;
+padding:20px 22px;margin:18px 0}
+h2{font-size:19px;margin:0 0 14px;display:flex;align-items:center;gap:8px}
+h2 .num{background:var(--brand);color:#fff;border-radius:8px;font-size:13px;
+padding:2px 9px}
+h3{font-size:15px;color:var(--muted);margin:18px 0 8px}
+table{width:100%;border-collapse:collapse;font-size:14px}
+th,td{text-align:left;padding:9px 10px;border-bottom:1px solid var(--line);white-space:nowrap}
+th{color:var(--muted);font-weight:600;font-size:13px}
+td:first-child,th:first-child{white-space:normal}
+.tbl-scroll{overflow-x:auto}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:18px}
+@media(max-width:760px){.grid2{grid-template-columns:1fr}}
+.chart-box{position:relative;height:280px}
+.chip{display:inline-block;background:rgba(79,110,242,.12);color:var(--brand);
+border-radius:999px;padding:3px 10px;font-size:12.5px;margin:2px 3px 2px 0}
+.chip.neg{background:rgba(229,72,77,.12);color:var(--bad)}
+.chip b{font-weight:700}
+.chips{margin-top:8px}
+.card{background:var(--bg);border:1px solid var(--line);border-radius:12px;
+padding:14px 16px;margin:10px 0}
+.promo{border-left:4px solid var(--good);background:var(--bg);border-radius:10px;
+padding:12px 14px;margin:10px 0}
+.promo.consider{border-left-color:var(--warn)}
+.promo-head{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.pname{font-weight:700}
+.promo-meta{color:var(--muted);font-size:13px;margin:4px 0}
+.badge{font-size:12px;border-radius:6px;padding:2px 8px;color:#fff;background:var(--good)}
+.badge.consider{background:var(--warn)}
+.badge.danger{background:var(--bad)}
+.badge.pb{background:var(--pb)}
+.rec-head{margin-bottom:6px}
+.rec-list{margin:6px 0 0;padding-left:18px;font-size:14px}
+.rec-list.samples li{color:var(--muted);margin:3px 0}
+.muted{color:var(--muted)} .small{font-size:13px}
+.warn{color:var(--warn);font-size:13px}
+.neg-card{border-left:4px solid var(--bad)}
+.pb-card{border-left:4px solid var(--pb)}
+code{background:var(--line);padding:1px 5px;border-radius:4px;font-size:12.5px}
+footer{color:var(--muted);font-size:12.5px;margin-top:26px;line-height:1.7}
+</style></head>
+<body><div class="wrap">
+<header>
+  <h1>원룸만들기 리뷰 분석 리포트</h1>
+  <div class="sub">데이터 소스: 카페24 상품후기 API · 기간: 2019-01-01 ~ 2026-07-09 · 생성: 2026-07-09 06:32</div>
+</header>
+
+<div class="kpis">
+  <div class="kpi"><div class="n">244,811</div><div class="l">전체 리뷰 수</div></div>
+  <div class="kpi"><div class="n">★4.61</div><div class="l">평균 평점</div></div>
+  <div class="kpi"><div class="n">88.3%</div><div class="l">긍정 비율(4점+)</div></div>
+  <div class="kpi"><div class="n">8,713</div><div class="l">리뷰 상품 수</div></div>
+  <div class="kpi"><div class="n">31.1%</div><div class="l">포토리뷰 비율</div></div>
+  <div class="kpi"><div class="n">10,260</div><div class="l">부정 리뷰(1~2점)</div></div>
+</div>
+
+<section>
+  <h2><span class="num">1</span> 평점 분포 · 월별 추이 · 포토리뷰</h2>
+  <div class="grid2">
+    <div><h3>평점 분포 (1~5점)</h3><div class="chart-box"><canvas id="ratingChart"></canvas></div></div>
+    <div><h3>포토리뷰 비율</h3><div class="chart-box"><canvas id="photoChart"></canvas></div></div>
+  </div>
+  <h3>월별 리뷰 추이 (건수 · 평균평점)</h3>
+  <div class="chart-box"><canvas id="monthlyChart"></canvas></div>
+</section>
+
+<section>
+  <h2><span class="num">2</span> 상품별 분석 (상위·하위)</h2>
+  <h3>리뷰 많은 상품 TOP 10</h3><div class="tbl-scroll"><table><thead><tr><th>상품명</th><th>카테고리</th><th>리뷰수</th><th>평균평점</th><th>긍정비율</th><th>포토비율</th></tr></thead><tbody><tr><td>봉투밀착 밀폐 센서휴지통</td><td>주방/식기</td><td>5,429</td><td>★4.48</td><td>85.6%</td><td>32.0%</td></tr><tr><td>디스이즈 디퓨저</td><td>인테리어/소품</td><td>4,548</td><td>★4.64</td><td>87.5%</td><td>25.1%</td></tr><tr><td>330W 흡입력 괴물 청소기</td><td>청소/세탁</td><td>2,802</td><td>★4.71</td><td>92.4%</td><td>30.0%</td></tr><tr><td>유어메이트 워싱 차렵이불</td><td>침구/매트리스</td><td>2,215</td><td>★4.64</td><td>89.8%</td><td>21.5%</td></tr><tr><td>대용량 화장품 정리함</td><td>수납/정리</td><td>2,080</td><td>★4.75</td><td>94.6%</td><td>41.4%</td></tr><tr><td>상품 200</td><td>기타</td><td>2,064</td><td>★4.64</td><td>85.1%</td><td>11.3%</td></tr><tr><td>상품 1917</td><td>기타</td><td>1,881</td><td>★4.67</td><td>87.2%</td><td>25.0%</td></tr><tr><td>반반 매트리스 토퍼 10cm</td><td>침구/매트리스</td><td>1,705</td><td>★4.73</td><td>93.8%</td><td>31.9%</td></tr><tr><td>이동식 바지걸이 행거</td><td>수납/정리</td><td>1,595</td><td>★4.85</td><td>96.9%</td><td>39.6%</td></tr><tr><td>추가_330W 청소기 추가상품</td><td>청소/세탁</td><td>1,516</td><td>★4.75</td><td>94.0%</td><td>29.6%</td></tr></tbody></table></div>
+  <h3>만족도 높은 상품 TOP 10 <span class="muted small">(최소 리뷰 기준 충족)</span></h3><div class="tbl-scroll"><table><thead><tr><th>상품명</th><th>카테고리</th><th>리뷰수</th><th>평균평점</th><th>긍정비율</th><th>포토비율</th></tr></thead><tbody><tr><td>별도_브리타 추가 필터</td><td>생활가전</td><td>71</td><td>★5.00</td><td>100.0%</td><td>35.2%</td></tr><tr><td>4000W 큐브 멀티탭</td><td>생활가전</td><td>40</td><td>★5.00</td><td>100.0%</td><td>97.5%</td></tr><tr><td>썸머캔디 여름 침구 모음</td><td>침구/매트리스</td><td>39</td><td>★5.00</td><td>100.0%</td><td>33.3%</td></tr><tr><td>책모형 수납 박스 18종</td><td>수납/정리</td><td>39</td><td>★5.00</td><td>100.0%</td><td>25.6%</td></tr><tr><td>원룸만들기 티셔츠2탄 4종</td><td>기타</td><td>34</td><td>★5.00</td><td>100.0%</td><td>20.6%</td></tr><tr><td>스테인리스 소스볼 11종</td><td>기타</td><td>33</td><td>★5.00</td><td>100.0%</td><td>6.1%</td></tr><tr><td>특허받은 렌지용 저당밥솥</td><td>생활가전</td><td>33</td><td>★5.00</td><td>100.0%</td><td>12.1%</td></tr><tr><td>슬립베이커리 토핑필로우</td><td>기타</td><td>29</td><td>★5.00</td><td>100.0%</td><td>20.7%</td></tr><tr><td>철푸덕 오리 무드등</td><td>생활가전</td><td>29</td><td>★5.00</td><td>100.0%</td><td>31.0%</td></tr><tr><td>3단계 높이조절 슈즈렉</td><td>기타</td><td>27</td><td>★5.00</td><td>100.0%</td><td>37.0%</td></tr></tbody></table></div>
+  <h3>만족도 낮은 상품 BOTTOM 10</h3><div class="tbl-scroll"><table><thead><tr><th>상품명</th><th>카테고리</th><th>리뷰수</th><th>평균평점</th><th>긍정비율</th><th>포토비율</th></tr></thead><tbody><tr><td>롱베개 바디필로우 모음</td><td>침구/매트리스</td><td>28</td><td>★3.18</td><td>46.4%</td><td>10.7%</td></tr><tr><td>가림막 무볼트 행거</td><td>수납/정리</td><td>22</td><td>★3.27</td><td>45.5%</td><td>4.5%</td></tr><tr><td>계단확장 화장대 정리함</td><td>수납/정리</td><td>28</td><td>★3.32</td><td>50.0%</td><td>25.0%</td></tr><tr><td>물 넘침 방지 얼음틀</td><td>기타</td><td>21</td><td>★3.48</td><td>61.9%</td><td>23.8%</td></tr><tr><td>올인홈 높이조절 테이블</td><td>기타</td><td>72</td><td>★3.49</td><td>56.9%</td><td>19.4%</td></tr><tr><td>자취수건 10P세트</td><td>욕실/화장실</td><td>47</td><td>★3.55</td><td>61.7%</td><td>19.1%</td></tr><tr><td>셀프설치 창문 바람막이</td><td>기타</td><td>38</td><td>★3.61</td><td>63.2%</td><td>26.3%</td></tr><tr><td>마티나 전신거울 화장대</td><td>인테리어/소품</td><td>94</td><td>★3.67</td><td>62.8%</td><td>47.9%</td></tr><tr><td>쿨링 인절미 필로우</td><td>기타</td><td>377</td><td>★3.70</td><td>61.8%</td><td>24.1%</td></tr><tr><td>헤드선택 컴퓨터 메쉬의자</td><td>기타</td><td>51</td><td>★3.75</td><td>60.8%</td><td>62.7%</td></tr></tbody></table></div>
+</section>
+
+<section>
+  <h2><span class="num">3</span> 긍정 · 부정 키워드</h2>
+  <div class="grid2">
+    <div><h3>긍정 리뷰 키워드</h3><div class="chart-box"><canvas id="posKwChart"></canvas></div></div>
+    <div><h3>부정 리뷰(1~2점) 키워드</h3><div class="chart-box"><canvas id="negKwChart"></canvas></div></div>
+  </div>
+</section>
+
+<section>
+  <h2><span class="num">4</span> 판매 추진 전략 (비공구 유망상품)</h2>
+  <p class="warn">⚠ config.json 의 <code>group_buy_product_codes/names</code> 가 비어 있어 전 상품을 비(非)공구로 간주했습니다. 실제 공동구매 상품을 등록하면 정확도가 올라갑니다.</p>
+  <h3>▲ 적극 추진</h3><div class="promo strong">
+          <div class="promo-head"><span class="badge strong">▲ 적극 추진</span>
+            <span class="pname">별도_브리타 추가 필터</span></div>
+          <div class="promo-meta">★5.00 · 긍정 100.0% · 리뷰 71 · 생활가전</div>
+          <div class="chips"><span class="chip">만족</span> <span class="chip">저렴/가성비</span> <span class="chip">배송</span></div></div><div class="promo strong">
+          <div class="promo-head"><span class="badge strong">▲ 적극 추진</span>
+            <span class="pname">4000W 큐브 멀티탭</span></div>
+          <div class="promo-meta">★5.00 · 긍정 100.0% · 리뷰 40 · 생활가전</div>
+          <div class="chips"><span class="chip">예쁘다</span> <span class="chip">편하다</span> <span class="chip">만족</span> <span class="chip">깔끔하다</span></div></div><div class="promo strong">
+          <div class="promo-head"><span class="badge strong">▲ 적극 추진</span>
+            <span class="pname">썸머캔디 여름 침구 모음</span></div>
+          <div class="promo-meta">★5.00 · 긍정 100.0% · 리뷰 39 · 침구/매트리스</div>
+          <div class="chips"><span class="chip">시원하다</span> <span class="chip">만족</span> <span class="chip">가볍다</span> <span class="chip">배송</span></div></div><div class="promo strong">
+          <div class="promo-head"><span class="badge strong">▲ 적극 추진</span>
+            <span class="pname">책모형 수납 박스 18종</span></div>
+          <div class="promo-meta">★5.00 · 긍정 100.0% · 리뷰 39 · 수납/정리</div>
+          <div class="chips"><span class="chip">만족</span> <span class="chip">예쁘다</span> <span class="chip">깔끔하다</span> <span class="chip">배송</span></div></div><div class="promo strong">
+          <div class="promo-head"><span class="badge strong">▲ 적극 추진</span>
+            <span class="pname">원룸만들기 티셔츠2탄 4종</span></div>
+          <div class="promo-meta">★5.00 · 긍정 100.0% · 리뷰 34 · 기타</div>
+          <div class="chips"><span class="chip">편하다</span> <span class="chip">만족</span> <span class="chip">예쁘다</span> <span class="chip">깔끔하다</span></div></div><div class="promo strong">
+          <div class="promo-head"><span class="badge strong">▲ 적극 추진</span>
+            <span class="pname">스테인리스 소스볼 11종</span></div>
+          <div class="promo-meta">★5.00 · 긍정 100.0% · 리뷰 33 · 기타</div>
+          <div class="chips"><span class="chip">배송</span> <span class="chip">편하다</span> <span class="chip">깔끔하다</span> <span class="chip">예쁘다</span></div></div><div class="promo strong">
+          <div class="promo-head"><span class="badge strong">▲ 적극 추진</span>
+            <span class="pname">특허받은 렌지용 저당밥솥</span></div>
+          <div class="promo-meta">★5.00 · 긍정 100.0% · 리뷰 33 · 생활가전</div>
+          <div class="chips"><span class="chip">편하다</span> <span class="chip">만족</span> <span class="chip">가볍다</span> <span class="chip">배송</span></div></div><div class="promo strong">
+          <div class="promo-head"><span class="badge strong">▲ 적극 추진</span>
+            <span class="pname">굿나잇 카카오 무드등</span></div>
+          <div class="promo-meta">★4.98 · 긍정 100.0% · 리뷰 42 · 생활가전</div>
+          <div class="chips"><span class="chip">예쁘다</span> <span class="chip">만족</span> <span class="chip">따뜻하다</span> <span class="chip">편하다</span></div></div><div class="promo strong">
+          <div class="promo-head"><span class="badge strong">▲ 적극 추진</span>
+            <span class="pname">원룸만들기 가계부_PDF</span></div>
+          <div class="promo-meta">★4.97 · 긍정 100.0% · 리뷰 34 · 기타</div>
+          <div class="chips"><span class="chip">만족</span> <span class="chip">편하다</span> <span class="chip">깔끔하다</span> <span class="chip">예쁘다</span></div></div><div class="promo strong">
+          <div class="promo-head"><span class="badge strong">▲ 적극 추진</span>
+            <span class="pname">파스텔 필터&amp;수압 샤워기</span></div>
+          <div class="promo-meta">★4.97 · 긍정 100.0% · 리뷰 34 · 생활가전</div>
+          <div class="chips"><span class="chip">예쁘다</span> <span class="chip">만족</span> <span class="chip">편하다</span> <span class="chip">가볍다</span></div></div><div class="promo strong">
+          <div class="promo-head"><span class="badge strong">▲ 적극 추진</span>
+            <span class="pname">단모 러그 모음</span></div>
+          <div class="promo-meta">★4.97 · 긍정 100.0% · 리뷰 33 · 인테리어/소품</div>
+          <div class="chips"><span class="chip">예쁘다</span> <span class="chip">따뜻하다</span> <span class="chip">만족</span> <span class="chip">튼튼하다</span></div></div><div class="promo strong">
+          <div class="promo-head"><span class="badge strong">▲ 적극 추진</span>
+            <span class="pname">오예스 마그넷 보조배터리</span></div>
+          <div class="promo-meta">★4.97 · 긍정 100.0% · 리뷰 32 · 기타</div>
+          <div class="chips"><span class="chip">만족</span> <span class="chip">예쁘다</span> <span class="chip">배송</span> <span class="chip">고급스럽다</span></div></div><div class="promo strong">
+          <div class="promo-head"><span class="badge strong">▲ 적극 추진</span>
+            <span class="pname">아이스 접촉냉감 여름이불</span></div>
+          <div class="promo-meta">★4.97 · 긍정 100.0% · 리뷰 30 · 침구/매트리스</div>
+          <div class="chips"><span class="chip">시원하다</span> <span class="chip">만족</span> <span class="chip">예쁘다</span> <span class="chip">가볍다</span></div></div><div class="promo strong">
+          <div class="promo-head"><span class="badge strong">▲ 적극 추진</span>
+            <span class="pname">이동식 팬트리 스낵 선반</span></div>
+          <div class="promo-meta">★4.96 · 긍정 100.0% · 리뷰 46 · 수납/정리</div>
+          <div class="chips"><span class="chip">만족</span> <span class="chip">배송</span> <span class="chip">깔끔하다</span> <span class="chip">편하다</span></div></div><div class="promo strong">
+          <div class="promo-head"><span class="badge strong">▲ 적극 추진</span>
+            <span class="pname">추가_중소바이미 추가상품</span></div>
+          <div class="promo-meta">★4.95 · 긍정 98.7% · 리뷰 74 · 기타</div>
+          <div class="chips"><span class="chip">만족</span> <span class="chip">배송</span> <span class="chip">편하다</span> <span class="chip">튼튼하다</span></div></div><div class="promo strong">
+          <div class="promo-head"><span class="badge strong">▲ 적극 추진</span>
+            <span class="pname">퓨어터치 워싱 매트커버</span></div>
+          <div class="promo-meta">★4.95 · 긍정 98.3% · 리뷰 58 · 침구/매트리스</div>
+          <div class="chips"><span class="chip">예쁘다</span> <span class="chip">만족</span> <span class="chip">깔끔하다</span> <span class="chip">배송</span></div></div><div class="promo strong">
+          <div class="promo-head"><span class="badge strong">▲ 적극 추진</span>
+            <span class="pname">연인 블럭게임</span></div>
+          <div class="promo-meta">★4.95 · 긍정 100.0% · 리뷰 37 · 기타</div>
+          <div class="chips"><span class="chip">배송</span> <span class="chip">만족</span> <span class="chip">편하다</span> <span class="chip">예쁘다</span></div></div><div class="promo strong">
+          <div class="promo-head"><span class="badge strong">▲ 적극 추진</span>
+            <span class="pname">서프라이즈 용돈 통장</span></div>
+          <div class="promo-meta">★4.94 · 긍정 97.7% · 리뷰 88 · 기타</div>
+          <div class="chips"><span class="chip">만족</span> <span class="chip">배송</span> <span class="chip">고급스럽다</span> <span class="chip">예쁘다</span></div></div><div class="promo strong">
+          <div class="promo-head"><span class="badge strong">▲ 적극 추진</span>
+            <span class="pname">비즈 캔들워머</span></div>
+          <div class="promo-meta">★4.94 · 긍정 100.0% · 리뷰 50 · 인테리어/소품</div>
+          <div class="chips"><span class="chip">만족</span> <span class="chip">예쁘다</span> <span class="chip">저렴/가성비</span> <span class="chip">배송</span></div></div><div class="promo strong">
+          <div class="promo-head"><span class="badge strong">▲ 적극 추진</span>
+            <span class="pname">[단종]휴대용 워치 보조배터리</span></div>
+          <div class="promo-meta">★4.94 · 긍정 100.0% · 리뷰 50 · 기타</div>
+          <div class="chips"><span class="chip">편하다</span> <span class="chip">설치쉬움</span> <span class="chip">배송</span> <span class="chip">만족</span></div></div><div class="promo strong">
+          <div class="promo-head"><span class="badge strong">▲ 적극 추진</span>
+            <span class="pname">밴딩형 매트리스패드 모음</span></div>
+          <div class="promo-meta">★4.94 · 긍정 100.0% · 리뷰 36 · 침구/매트리스</div>
+          <div class="chips"><span class="chip">만족</span> <span class="chip">예쁘다</span> <span class="chip">깔끔하다</span> <span class="chip">저렴/가성비</span></div></div><div class="promo strong">
+          <div class="promo-head"><span class="badge strong">▲ 적극 추진</span>
+            <span class="pname">허리케인 캔들워머</span></div>
+          <div class="promo-meta">★4.94 · 긍정 100.0% · 리뷰 33 · 인테리어/소품</div>
+          <div class="chips"><span class="chip">배송</span> <span class="chip">만족</span> <span class="chip">편하다</span> <span class="chip">예쁘다</span></div></div><div class="promo strong">
+          <div class="promo-head"><span class="badge strong">▲ 적극 추진</span>
+            <span class="pname">진로 블루투스 마이크</span></div>
+          <div class="promo-meta">★4.94 · 긍정 100.0% · 리뷰 33 · 기타</div>
+          <div class="chips"><span class="chip">예쁘다</span> <span class="chip">만족</span> <span class="chip">배송</span> <span class="chip">가볍다</span></div></div><div class="promo strong">
+          <div class="promo-head"><span class="badge strong">▲ 적극 추진</span>
+            <span class="pname">뚱뚱 애착 인형 4종</span></div>
+          <div class="promo-meta">★4.94 · 긍정 100.0% · 리뷰 33 · 기타</div>
+          <div class="chips"><span class="chip">배송</span> <span class="chip">부드럽다</span> <span class="chip">예쁘다</span> <span class="chip">만족</span></div></div><div class="promo strong">
+          <div class="promo-head"><span class="badge strong">▲ 적극 추진</span>
+            <span class="pname">자동세척 물걸레 청소기</span></div>
+          <div class="promo-meta">★4.94 · 긍정 100.0% · 리뷰 32 · 청소/세탁</div>
+          <div class="chips"><span class="chip">만족</span> <span class="chip">편하다</span> <span class="chip">저렴/가성비</span> <span class="chip">배송</span></div></div><div class="promo strong">
+          <div class="promo-head"><span class="badge strong">▲ 적극 추진</span>
+            <span class="pname">스테인리스 욕실 선반 11종</span></div>
+          <div class="promo-meta">★4.93 · 긍정 99.2% · 리뷰 133 · 수납/정리</div>
+          <div class="chips"><span class="chip">튼튼하다</span> <span class="chip">만족</span> <span class="chip">깔끔하다</span> <span class="chip">편하다</span></div></div><div class="promo strong">
+          <div class="promo-head"><span class="badge strong">▲ 적극 추진</span>
+            <span class="pname">포스터 액자 테이블 82종</span></div>
+          <div class="promo-meta">★4.93 · 긍정 100.0% · 리뷰 76 · 인테리어/소품</div>
+          <div class="chips"><span class="chip">예쁘다</span> <span class="chip">만족</span> <span class="chip">튼튼하다</span> <span class="chip">저렴/가성비</span></div></div><div class="promo strong">
+          <div class="promo-head"><span class="badge strong">▲ 적극 추진</span>
+            <span class="pname">짱구 굿즈 모음</span></div>
+          <div class="promo-meta">★4.93 · 긍정 98.6% · 리뷰 69 · 기타</div>
+          <div class="chips"><span class="chip">만족</span> <span class="chip">예쁘다</span> <span class="chip">배송</span> <span class="chip">편하다</span></div></div><div class="promo strong">
+          <div class="promo-head"><span class="badge strong">▲ 적극 추진</span>
+            <span class="pname">앙리마티스 포스터 75종</span></div>
+          <div class="promo-meta">★4.93 · 긍정 98.4% · 리뷰 61 · 인테리어/소품</div>
+          <div class="chips"><span class="chip">예쁘다</span> <span class="chip">만족</span> <span class="chip">배송</span> <span class="chip">저렴/가성비</span></div></div><div class="promo strong">
+          <div class="promo-head"><span class="badge strong">▲ 적극 추진</span>
+            <span class="pname">두꺼운 4단 폴딩 소파베드</span></div>
+          <div class="promo-meta">★4.93 · 긍정 100.0% · 리뷰 43 · 기타</div>
+          <div class="chips"><span class="chip">만족</span> <span class="chip">편하다</span> <span class="chip">튼튼하다</span> <span class="chip">예쁘다</span></div></div><div class="promo strong">
+          <div class="promo-head"><span class="badge strong">▲ 적극 추진</span>
+            <span class="pname">먼지없는 사이잘룩 러그</span></div>
+          <div class="promo-meta">★4.93 · 긍정 97.6% · 리뷰 42 · 청소/세탁</div>
+          <div class="chips"><span class="chip">예쁘다</span> <span class="chip">만족</span> <span class="chip">깔끔하다</span> <span class="chip">배송</span></div></div><div class="promo strong">
+          <div class="promo-head"><span class="badge strong">▲ 적극 추진</span>
+            <span class="pname">호텔식 암막 커튼 1+1</span></div>
+          <div class="promo-meta">★4.92 · 긍정 98.4% · 리뷰 184 · 인테리어/소품</div>
+          <div class="chips"><span class="chip">예쁘다</span> <span class="chip">만족</span> <span class="chip">배송</span> <span class="chip">저렴/가성비</span></div></div><div class="promo strong">
+          <div class="promo-head"><span class="badge strong">▲ 적극 추진</span>
+            <span class="pname">로마네 발매트 모음</span></div>
+          <div class="promo-meta">★4.92 · 긍정 99.1% · 리뷰 106 · 욕실/화장실</div>
+          <div class="chips"><span class="chip">예쁘다</span> <span class="chip">만족</span> <span class="chip">부드럽다</span> <span class="chip">저렴/가성비</span></div></div><div class="promo strong">
+          <div class="promo-head"><span class="badge strong">▲ 적극 추진</span>
+            <span class="pname">LED 네온사인 무드등</span></div>
+          <div class="promo-meta">★4.92 · 긍정 98.4% · 리뷰 64 · 생활가전</div>
+          <div class="chips"><span class="chip">예쁘다</span> <span class="chip">만족</span> <span class="chip">배송</span> <span class="chip">저렴/가성비</span></div></div><div class="promo strong">
+          <div class="promo-head"><span class="badge strong">▲ 적극 추진</span>
+            <span class="pname">로마네 칫솔꽂이/디스펜서</span></div>
+          <div class="promo-meta">★4.92 · 긍정 98.4% · 리뷰 63 · 욕실/화장실</div>
+          <div class="chips"><span class="chip">예쁘다</span> <span class="chip">만족</span></div></div><div class="promo strong">
+          <div class="promo-head"><span class="badge strong">▲ 적극 추진</span>
+            <span class="pname">귀여운 냉장고 자석 5종</span></div>
+          <div class="promo-meta">★4.92 · 긍정 97.2% · 리뷰 36 · 기타</div>
+          <div class="chips"><span class="chip">만족</span> <span class="chip">예쁘다</span></div></div><div class="promo strong">
+          <div class="promo-head"><span class="badge strong">▲ 적극 추진</span>
+            <span class="pname">실리콘 주방용품 모음</span></div>
+          <div class="promo-meta">★4.91 · 긍정 97.9% · 리뷰 93 · 주방/식기</div>
+          <div class="chips"><span class="chip">예쁘다</span> <span class="chip">만족</span> <span class="chip">배송</span> <span class="chip">편하다</span></div></div><div class="promo strong">
+          <div class="promo-head"><span class="badge strong">▲ 적극 추진</span>
+            <span class="pname">우노 분리수거함</span></div>
+          <div class="promo-meta">★4.91 · 긍정 98.2% · 리뷰 55 · 기타</div>
+          <div class="chips"><span class="chip">편하다</span> <span class="chip">깔끔하다</span> <span class="chip">예쁘다</span> <span class="chip">만족</span></div></div><div class="promo strong">
+          <div class="promo-head"><span class="badge strong">▲ 적극 추진</span>
+            <span class="pname">북유럽 포스터 모음</span></div>
+          <div class="promo-meta">★4.91 · 긍정 97.8% · 리뷰 45 · 인테리어/소품</div>
+          <div class="chips"><span class="chip">예쁘다</span> <span class="chip">배송</span> <span class="chip">고급스럽다</span> <span class="chip">만족</span></div></div><div class="promo strong">
+          <div class="promo-head"><span class="badge strong">▲ 적극 추진</span>
+            <span class="pname">LED 앵두 전구</span></div>
+          <div class="promo-meta">★4.91 · 긍정 97.8% · 리뷰 45 · 생활가전</div>
+          <div class="chips"><span class="chip">예쁘다</span> <span class="chip">배송</span> <span class="chip">저렴/가성비</span> <span class="chip">만족</span></div></div><div class="promo strong">
+          <div class="promo-head"><span class="badge strong">▲ 적극 추진</span>
+            <span class="pname">별도_330W 청소기 추가상품</span></div>
+          <div class="promo-meta">★4.91 · 긍정 97.7% · 리뷰 43 · 청소/세탁</div>
+          <div class="chips"><span class="chip">만족</span> <span class="chip">편하다</span> <span class="chip">저렴/가성비</span> <span class="chip">튼튼하다</span></div></div><div class="promo strong">
+          <div class="promo-head"><span class="badge strong">▲ 적극 추진</span>
+            <span class="pname">지그재그 여름 차렵 침구</span></div>
+          <div class="promo-meta">★4.91 · 긍정 100.0% · 리뷰 35 · 침구/매트리스</div>
+          <div class="chips"><span class="chip">시원하다</span> <span class="chip">만족</span> <span class="chip">가볍다</span> <span class="chip">배송</span></div></div><div class="promo strong">
+          <div class="promo-head"><span class="badge strong">▲ 적극 추진</span>
+            <span class="pname">아이스볼트 냉각 선풍기</span></div>
+          <div class="promo-meta">★4.91 · 긍정 97.1% · 리뷰 34 · 계절가전</div>
+          <div class="chips"><span class="chip">시원하다</span> <span class="chip">만족</span> <span class="chip">가볍다</span> <span class="chip">조용하다</span></div></div><div class="promo strong">
+          <div class="promo-head"><span class="badge strong">▲ 적극 추진</span>
+            <span class="pname">메쉬 언더베드 리빙박스</span></div>
+          <div class="promo-meta">★4.91 · 긍정 100.0% · 리뷰 33 · 수납/정리</div>
+          <div class="chips"><span class="chip">깔끔하다</span> <span class="chip">튼튼하다</span> <span class="chip">만족</span> <span class="chip">배송</span></div></div><div class="promo strong">
+          <div class="promo-head"><span class="badge strong">▲ 적극 추진</span>
+            <span class="pname">효도 용돈 토퍼</span></div>
+          <div class="promo-meta">★4.90 · 긍정 96.8% · 리뷰 311 · 침구/매트리스</div>
+          <div class="chips"><span class="chip">배송</span> <span class="chip">만족</span> <span class="chip">예쁘다</span> <span class="chip">저렴/가성비</span></div></div><div class="promo strong">
+          <div class="promo-head"><span class="badge strong">▲ 적극 추진</span>
+            <span class="pname">캐릭터 마우스 장패드</span></div>
+          <div class="promo-meta">★4.90 · 긍정 98.1% · 리뷰 52 · 침구/매트리스</div>
+          <div class="chips"><span class="chip">예쁘다</span> <span class="chip">만족</span> <span class="chip">배송</span> <span class="chip">저렴/가성비</span></div></div><div class="promo strong">
+          <div class="promo-head"><span class="badge strong">▲ 적극 추진</span>
+            <span class="pname">무타공 주방 선반</span></div>
+          <div class="promo-meta">★4.90 · 긍정 97.6% · 리뷰 41 · 주방/식기</div>
+          <div class="chips"><span class="chip">편하다</span> <span class="chip">깔끔하다</span> <span class="chip">설치쉬움</span> <span class="chip">튼튼하다</span></div></div><div class="promo strong">
+          <div class="promo-head"><span class="badge strong">▲ 적극 추진</span>
+            <span class="pname">메종드꼼마 접이식 테이블</span></div>
+          <div class="promo-meta">★4.90 · 긍정 97.4% · 리뷰 39 · 기타</div>
+          <div class="chips"><span class="chip">예쁘다</span> <span class="chip">튼튼하다</span> <span class="chip">만족</span> <span class="chip">깔끔하다</span></div></div><div class="promo strong">
+          <div class="promo-head"><span class="badge strong">▲ 적극 추진</span>
+            <span class="pname">줄달린 자동변기세정제 4P</span></div>
+          <div class="promo-meta">★4.90 · 긍정 100.0% · 리뷰 31 · 욕실/화장실</div>
+          <div class="chips"><span class="chip">편하다</span> <span class="chip">깔끔하다</span> <span class="chip">만족</span> <span class="chip">저렴/가성비</span></div></div><div class="promo strong">
+          <div class="promo-head"><span class="badge strong">▲ 적극 추진</span>
+            <span class="pname">유럽 풍경 포스터 100종</span></div>
+          <div class="promo-meta">★4.89 · 긍정 99.3% · 리뷰 148 · 인테리어/소품</div>
+          <div class="chips"><span class="chip">예쁘다</span> <span class="chip">만족</span> <span class="chip">배송</span> <span class="chip">고급스럽다</span></div></div><div class="promo strong">
+          <div class="promo-head"><span class="badge strong">▲ 적극 추진</span>
+            <span class="pname">프랑코 자석 우산꽂이</span></div>
+          <div class="promo-meta">★4.89 · 긍정 98.8% · 리뷰 81 · 기타</div>
+          <div class="chips"><span class="chip">만족</span> <span class="chip">깔끔하다</span> <span class="chip">편하다</span> <span class="chip">예쁘다</span></div></div><div class="promo strong">
+          <div class="promo-head"><span class="badge strong">▲ 적극 추진</span>
+            <span class="pname">중소바이미 기둥 선반</span></div>
+          <div class="promo-meta">★4.89 · 긍정 98.4% · 리뷰 62 · 수납/정리</div>
+          <div class="chips"><span class="chip">만족</span> <span class="chip">배송</span> <span class="chip">편하다</span> <span class="chip">튼튼하다</span></div></div><div class="promo strong">
+          <div class="promo-head"><span class="badge strong">▲ 적극 추진</span>
+            <span class="pname">지압 마사지볼</span></div>
+          <div class="promo-meta">★4.89 · 긍정 98.4% · 리뷰 61 · 기타</div>
+          <div class="chips"><span class="chip">시원하다</span> <span class="chip">저렴/가성비</span> <span class="chip">만족</span> <span class="chip">배송</span></div></div><div class="promo strong">
+          <div class="promo-head"><span class="badge strong">▲ 적극 추진</span>
+            <span class="pname">인테리어 시트지 모음</span></div>
+          <div class="promo-meta">★4.89 · 긍정 98.2% · 리뷰 57 · 인테리어/소품</div>
+          <div class="chips"><span class="chip">만족</span> <span class="chip">깔끔하다</span> <span class="chip">예쁘다</span> <span class="chip">배송</span></div></div><div class="promo strong">
+          <div class="promo-head"><span class="badge strong">▲ 적극 추진</span>
+            <span class="pname">산리오 미니 필터샤워기</span></div>
+          <div class="promo-meta">★4.89 · 긍정 95.5% · 리뷰 44 · 생활가전</div>
+          <div class="chips"><span class="chip">만족</span> <span class="chip">예쁘다</span> <span class="chip">가볍다</span> <span class="chip">편하다</span></div></div><div class="promo strong">
+          <div class="promo-head"><span class="badge strong">▲ 적극 추진</span>
+            <span class="pname">먼지없는 밸런스 러그</span></div>
+          <div class="promo-meta">★4.89 · 긍정 100.0% · 리뷰 38 · 청소/세탁</div>
+          <div class="chips"><span class="chip">만족</span> <span class="chip">예쁘다</span> <span class="chip">따뜻하다</span> <span class="chip">배송</span></div></div><div class="promo strong">
+          <div class="promo-head"><span class="badge strong">▲ 적극 추진</span>
+            <span class="pname">턴테이블 무선 디퓨저</span></div>
+          <div class="promo-meta">★4.89 · 긍정 97.2% · 리뷰 36 · 생활가전</div>
+          <div class="chips"><span class="chip">예쁘다</span> <span class="chip">만족</span> <span class="chip">편하다</span> <span class="chip">배송</span></div></div><div class="promo strong">
+          <div class="promo-head"><span class="badge strong">▲ 적극 추진</span>
+            <span class="pname">벽걸이 휴지통</span></div>
+          <div class="promo-meta">★4.88 · 긍정 97.0% · 리뷰 67 · 주방/식기</div>
+          <div class="chips"><span class="chip">깔끔하다</span> <span class="chip">편하다</span> <span class="chip">예쁘다</span> <span class="chip">만족</span></div></div><div class="promo strong">
+          <div class="promo-head"><span class="badge strong">▲ 적극 추진</span>
+            <span class="pname">슬리핑타운 수면양말 모음</span></div>
+          <div class="promo-meta">★4.88 · 긍정 98.3% · 리뷰 59 · 기타</div>
+          <div class="chips"><span class="chip">따뜻하다</span> <span class="chip">만족</span> <span class="chip">배송</span> <span class="chip">예쁘다</span></div></div><div class="promo strong">
+          <div class="promo-head"><span class="badge strong">▲ 적극 추진</span>
+            <span class="pname">자국없는 벨크로 쉬폰커튼</span></div>
+          <div class="promo-meta">★4.88 · 긍정 98.2% · 리뷰 57 · 인테리어/소품</div>
+          <div class="chips"><span class="chip">만족</span> <span class="chip">예쁘다</span> <span class="chip">편하다</span> <span class="chip">가볍다</span></div></div><div class="promo strong">
+          <div class="promo-head"><span class="badge strong">▲ 적극 추진</span>
+            <span class="pname">못 없는 안뚫어고리</span></div>
+          <div class="promo-meta">★4.88 · 긍정 96.0% · 리뷰 50 · 기타</div>
+          <div class="chips"><span class="chip">만족</span> <span class="chip">튼튼하다</span> <span class="chip">편하다</span> <span class="chip">깔끔하다</span></div></div><div class="promo strong">
+          <div class="promo-head"><span class="badge strong">▲ 적극 추진</span>
+            <span class="pname">아이브릭 블루투스 스피커</span></div>
+          <div class="promo-meta">★4.88 · 긍정 95.8% · 리뷰 48 · 기타</div>
+          <div class="chips"><span class="chip">예쁘다</span> <span class="chip">만족</span> <span class="chip">배송</span> <span class="chip">저렴/가성비</span></div></div><div class="promo strong">
+          <div class="promo-head"><span class="badge strong">▲ 적극 추진</span>
+            <span class="pname">스텐 주방 정리대 9종</span></div>
+          <div class="promo-meta">★4.88 · 긍정 97.7% · 리뷰 43 · 주방/식기</div>
+          <div class="chips"><span class="chip">만족</span> <span class="chip">편하다</span> <span class="chip">튼튼하다</span> <span class="chip">깔끔하다</span></div></div><div class="promo strong">
+          <div class="promo-head"><span class="badge strong">▲ 적극 추진</span>
+            <span class="pname">[단종]접이식 옷 정리함</span></div>
+          <div class="promo-meta">★4.88 · 긍정 97.6% · 리뷰 42 · 수납/정리</div>
+          <div class="chips"><span class="chip">예쁘다</span> <span class="chip">깔끔하다</span> <span class="chip">튼튼하다</span> <span class="chip">만족</span></div></div><div class="promo strong">
+          <div class="promo-head"><span class="badge strong">▲ 적극 추진</span>
+            <span class="pname">칸칸이 강력밀폐 반찬통</span></div>
+          <div class="promo-meta">★4.88 · 긍정 97.5% · 리뷰 40 · 주방/식기</div>
+          <div class="chips"><span class="chip">편하다</span> <span class="chip">깔끔하다</span> <span class="chip">만족</span> <span class="chip">따뜻하다</span></div></div><div class="promo strong">
+          <div class="promo-head"><span class="badge strong">▲ 적극 추진</span>
+            <span class="pname">층간소음방지 슬리퍼 2종</span></div>
+          <div class="promo-meta">★4.88 · 긍정 97.5% · 리뷰 40 · 기타</div>
+          <div class="chips"><span class="chip">만족</span> <span class="chip">예쁘다</span> <span class="chip">편하다</span> <span class="chip">조용하다</span></div></div><div class="promo strong">
+          <div class="promo-head"><span class="badge strong">▲ 적극 추진</span>
+            <span class="pname">양키 캔들 모음</span></div>
+          <div class="promo-meta">★4.88 · 긍정 97.1% · 리뷰 34 · 인테리어/소품</div>
+          <div class="chips"><span class="chip">만족</span> <span class="chip">배송</span> <span class="chip">예쁘다</span></div></div><div class="promo strong">
+          <div class="promo-head"><span class="badge strong">▲ 적극 추진</span>
+            <span class="pname">트루베 숙면매트리스 3종</span></div>
+          <div class="promo-meta">★4.88 · 긍정 97.1% · 리뷰 34 · 침구/매트리스</div>
+          <div class="chips"><span class="chip">튼튼하다</span> <span class="chip">편하다</span> <span class="chip">저렴/가성비</span> <span class="chip">만족</span></div></div><div class="promo strong">
+          <div class="promo-head"><span class="badge strong">▲ 적극 추진</span>
+            <span class="pname">미니 과일 뇌물 상자</span></div>
+          <div class="promo-meta">★4.88 · 긍정 97.0% · 리뷰 33 · 기타</div>
+          <div class="chips"><span class="chip">배송</span> <span class="chip">예쁘다</span> <span class="chip">만족</span> <span class="chip">저렴/가성비</span></div></div><div class="promo strong">
+          <div class="promo-head"><span class="badge strong">▲ 적극 추진</span>
+            <span class="pname">LBTI 연애 유형 검사</span></div>
+          <div class="promo-meta">★4.88 · 긍정 100.0% · 리뷰 32 · 기타</div>
+          <div class="chips"><span class="chip">저렴/가성비</span> <span class="chip">만족</span> <span class="chip">예쁘다</span> <span class="chip">배송</span></div></div><div class="promo strong">
+          <div class="promo-head"><span class="badge strong">▲ 적극 추진</span>
+            <span class="pname">앞접시 초미니국자 세트</span></div>
+          <div class="promo-meta">★4.87 · 긍정 96.3% · 리뷰 1,467 · 기타</div>
+          <div class="chips"><span class="chip">만족</span> <span class="chip">편하다</span> <span class="chip">예쁘다</span> <span class="chip">배송</span></div></div><div class="promo strong">
+          <div class="promo-head"><span class="badge strong">▲ 적극 추진</span>
+            <span class="pname">원룸만들기 티셔츠1탄 3종</span></div>
+          <div class="promo-meta">★4.87 · 긍정 100.0% · 리뷰 45 · 기타</div>
+          <div class="chips"><span class="chip">편하다</span> <span class="chip">만족</span> <span class="chip">예쁘다</span> <span class="chip">튼튼하다</span></div></div><div class="promo strong">
+          <div class="promo-head"><span class="badge strong">▲ 적극 추진</span>
+            <span class="pname">접이식 간이 의자 모음</span></div>
+          <div class="promo-meta">★4.87 · 긍정 96.8% · 리뷰 31 · 기타</div>
+          <div class="chips"><span class="chip">편하다</span> <span class="chip">예쁘다</span> <span class="chip">튼튼하다</span> <span class="chip">저렴/가성비</span></div></div><div class="promo strong">
+          <div class="promo-head"><span class="badge strong">▲ 적극 추진</span>
+            <span class="pname">레토 LED 스탠드 모음</span></div>
+          <div class="promo-meta">★4.87 · 긍정 96.8% · 리뷰 31 · 생활가전</div>
+          <div class="chips"><span class="chip">편하다</span> <span class="chip">만족</span> <span class="chip">깔끔하다</span> <span class="chip">예쁘다</span></div></div><div class="promo strong">
+          <div class="promo-head"><span class="badge strong">▲ 적극 추진</span>
+            <span class="pname">원터치 한강라면 조리기</span></div>
+          <div class="promo-meta">★4.87 · 긍정 100.0% · 리뷰 30 · 기타</div>
+          <div class="chips"><span class="chip">편하다</span> <span class="chip">설치쉬움</span> <span class="chip">만족</span> <span class="chip">예쁘다</span></div></div><div class="promo strong">
+          <div class="promo-head"><span class="badge strong">▲ 적극 추진</span>
+            <span class="pname">파인F2000 미니 제습기</span></div>
+          <div class="promo-meta">★4.87 · 긍정 100.0% · 리뷰 30 · 계절가전</div>
+          <div class="chips"><span class="chip">만족</span> <span class="chip">조용하다</span> <span class="chip">저렴/가성비</span> <span class="chip">배송</span></div></div><div class="promo strong">
+          <div class="promo-head"><span class="badge strong">▲ 적극 추진</span>
+            <span class="pname">DIY 타일 카페트</span></div>
+          <div class="promo-meta">★4.86 · 긍정 97.2% · 리뷰 678 · 기타</div>
+          <div class="chips"><span class="chip">만족</span> <span class="chip">깔끔하다</span> <span class="chip">예쁘다</span> <span class="chip">편하다</span></div></div><div class="promo strong">
+          <div class="promo-head"><span class="badge strong">▲ 적극 추진</span>
+            <span class="pname">괴물청소기 스테이션 단품</span></div>
+          <div class="promo-meta">★4.86 · 긍정 97.7% · 리뷰 43 · 청소/세탁</div>
+          <div class="chips"><span class="chip">만족</span> <span class="chip">편하다</span> <span class="chip">깔끔하다</span> <span class="chip">저렴/가성비</span></div></div><div class="promo strong">
+          <div class="promo-head"><span class="badge strong">▲ 적극 추진</span>
+            <span class="pname">이동식 바지걸이 행거</span></div>
+          <div class="promo-meta">★4.85 · 긍정 96.9% · 리뷰 1,595 · 수납/정리</div>
+          <div class="chips"><span class="chip">만족</span> <span class="chip">깔끔하다</span> <span class="chip">튼튼하다</span> <span class="chip">편하다</span></div></div><div class="promo strong">
+          <div class="promo-head"><span class="badge strong">▲ 적극 추진</span>
+            <span class="pname">대왕후드 집순이 잠옷</span></div>
+          <div class="promo-meta">★4.85 · 긍정 97.1% · 리뷰 314 · 기타</div>
+          <div class="chips"><span class="chip">따뜻하다</span> <span class="chip">편하다</span> <span class="chip">만족</span> <span class="chip">넉넉하다</span></div></div><div class="promo strong">
+          <div class="promo-head"><span class="badge strong">▲ 적극 추진</span>
+            <span class="pname">체중계 시리즈</span></div>
+          <div class="promo-meta">★4.85 · 긍정 95.5% · 리뷰 112 · 기타</div>
+          <div class="chips"><span class="chip">예쁘다</span> <span class="chip">깔끔하다</span> <span class="chip">배송</span> <span class="chip">저렴/가성비</span></div></div><div class="promo strong">
+          <div class="promo-head"><span class="badge strong">▲ 적극 추진</span>
+            <span class="pname">퀴진드마망 2인 수저세트</span></div>
+          <div class="promo-meta">★4.85 · 긍정 96.7% · 리뷰 61 · 주방/식기</div>
+          <div class="chips"><span class="chip">예쁘다</span> <span class="chip">가볍다</span> <span class="chip">만족</span> <span class="chip">깔끔하다</span></div></div><div class="promo strong">
+          <div class="promo-head"><span class="badge strong">▲ 적극 추진</span>
+            <span class="pname">플루딕 진공 음쓰통 2세대</span></div>
+          <div class="promo-meta">★4.85 · 긍정 98.4% · 리뷰 61 · 기타</div>
+          <div class="chips"><span class="chip">만족</span> <span class="chip">예쁘다</span> <span class="chip">깔끔하다</span> <span class="chip">편하다</span></div></div><div class="promo strong">
+          <div class="promo-head"><span class="badge strong">▲ 적극 추진</span>
+            <span class="pname">DIY 미니어처 가든카페</span></div>
+          <div class="promo-meta">★4.85 · 긍정 96.4% · 리뷰 55 · 기타</div>
+          <div class="chips"><span class="chip">만족</span> <span class="chip">예쁘다</span> <span class="chip">배송</span> <span class="chip">고급스럽다</span></div></div><div class="promo strong">
+          <div class="promo-head"><span class="badge strong">▲ 적극 추진</span>
+            <span class="pname">어글리 도트 식기세트</span></div>
+          <div class="promo-meta">★4.85 · 긍정 95.8% · 리뷰 48 · 주방/식기</div>
+          <div class="chips"><span class="chip">예쁘다</span> <span class="chip">만족</span> <span class="chip">배송</span> <span class="chip">깔끔하다</span></div></div><div class="promo strong">
+          <div class="promo-head"><span class="badge strong">▲ 적극 추진</span>
+            <span class="pname">풋터치 저소음 선풍기</span></div>
+          <div class="promo-meta">★4.85 · 긍정 97.1% · 리뷰 34 · 계절가전</div>
+          <div class="chips"><span class="chip">편하다</span> <span class="chip">조용하다</span> <span class="chip">만족</span> <span class="chip">배송</span></div></div><div class="promo strong">
+          <div class="promo-head"><span class="badge strong">▲ 적극 추진</span>
+            <span class="pname">발 매트 &amp; 주방매트 모음</span></div>
+          <div class="promo-meta">★4.85 · 긍정 97.0% · 리뷰 33 · 주방/식기</div>
+          <div class="chips"><span class="chip">만족</span> <span class="chip">예쁘다</span> <span class="chip">깔끔하다</span> <span class="chip">저렴/가성비</span></div></div><div class="promo strong">
+          <div class="promo-head"><span class="badge strong">▲ 적극 추진</span>
+            <span class="pname">컬러 라텍스 고무장갑</span></div>
+          <div class="promo-meta">★4.85 · 긍정 97.0% · 리뷰 33 · 기타</div>
+          <div class="chips"><span class="chip">예쁘다</span> <span class="chip">저렴/가성비</span> <span class="chip">배송</span> <span class="chip">만족</span></div></div><div class="promo strong">
+          <div class="promo-head"><span class="badge strong">▲ 적극 추진</span>
+            <span class="pname">미니 도끼칼 &amp; 전용케이스</span></div>
+          <div class="promo-meta">★4.85 · 긍정 97.0% · 리뷰 33 · 주방/식기</div>
+          <div class="chips"><span class="chip">예쁘다</span> <span class="chip">만족</span> <span class="chip">배송</span> <span class="chip">깔끔하다</span></div></div><div class="promo strong">
+          <div class="promo-head"><span class="badge strong">▲ 적극 추진</span>
+            <span class="pname">할미 플리츠 파자마</span></div>
+          <div class="promo-meta">★4.84 · 긍정 95.9% · 리뷰 440 · 기타</div>
+          <div class="chips"><span class="chip">시원하다</span> <span class="chip">편하다</span> <span class="chip">만족</span> <span class="chip">예쁘다</span></div></div><div class="promo strong">
+          <div class="promo-head"><span class="badge strong">▲ 적극 추진</span>
+            <span class="pname">파닥 모찌 오리인형</span></div>
+          <div class="promo-meta">★4.84 · 긍정 97.3% · 리뷰 188 · 기타</div>
+          <div class="chips"><span class="chip">배송</span> <span class="chip">만족</span> <span class="chip">예쁘다</span> <span class="chip">편하다</span></div></div><div class="promo strong">
+          <div class="promo-head"><span class="badge strong">▲ 적극 추진</span>
+            <span class="pname">리필용 디스이즈 디퓨저</span></div>
+          <div class="promo-meta">★4.84 · 긍정 96.7% · 리뷰 120 · 인테리어/소품</div>
+          <div class="chips"><span class="chip">만족</span> <span class="chip">저렴/가성비</span> <span class="chip">예쁘다</span> <span class="chip">배송</span></div></div><div class="promo strong">
+          <div class="promo-head"><span class="badge strong">▲ 적극 추진</span>
+            <span class="pname">왕 얼음틀 모음</span></div>
+          <div class="promo-meta">★4.84 · 긍정 96.0% · 리뷰 74 · 기타</div>
+          <div class="chips"><span class="chip">배송</span> <span class="chip">예쁘다</span> <span class="chip">만족</span> <span class="chip">편하다</span></div></div><div class="promo strong">
+          <div class="promo-head"><span class="badge strong">▲ 적극 추진</span>
+            <span class="pname">우드볼 도어후크 4종</span></div>
+          <div class="promo-meta">★4.84 · 긍정 95.7% · 리뷰 69 · 수납/정리</div>
+          <div class="chips"><span class="chip">깔끔하다</span> <span class="chip">편하다</span> <span class="chip">만족</span> <span class="chip">예쁘다</span></div></div><div class="promo strong">
+          <div class="promo-head"><span class="badge strong">▲ 적극 추진</span>
+            <span class="pname">호텔용 방수 매트리스커버</span></div>
+          <div class="promo-meta">★4.84 · 긍정 95.9% · 리뷰 49 · 침구/매트리스</div>
+          <div class="chips"><span class="chip">만족</span> <span class="chip">예쁘다</span> <span class="chip">배송</span> <span class="chip">튼튼하다</span></div></div><div class="promo strong">
+          <div class="promo-head"><span class="badge strong">▲ 적극 추진</span>
+            <span class="pname">베스토 조립식 선반</span></div>
+          <div class="promo-meta">★4.84 · 긍정 97.7% · 리뷰 43 · 수납/정리</div>
+          <div class="chips"><span class="chip">튼튼하다</span> <span class="chip">깔끔하다</span> <span class="chip">예쁘다</span> <span class="chip">만족</span></div></div><div class="promo strong">
+          <div class="promo-head"><span class="badge strong">▲ 적극 추진</span>
+            <span class="pname">쫀득 마약 빈백</span></div>
+          <div class="promo-meta">★4.84 · 긍정 97.3% · 리뷰 37 · 기타</div>
+          <div class="chips"><span class="chip">편하다</span> <span class="chip">배송</span> <span class="chip">만족</span> <span class="chip">저렴/가성비</span></div></div><div class="promo strong">
+          <div class="promo-head"><span class="badge strong">▲ 적극 추진</span>
+            <span class="pname">어깨뿔 방지 옷걸이 30P</span></div>
+          <div class="promo-meta">★4.84 · 긍정 97.3% · 리뷰 37 · 수납/정리</div>
+          <div class="chips"><span class="chip">만족</span> <span class="chip">편하다</span> <span class="chip">저렴/가성비</span> <span class="chip">깔끔하다</span></div></div><div class="promo strong">
+          <div class="promo-head"><span class="badge strong">▲ 적극 추진</span>
+            <span class="pname">빨간 내복 용돈박스</span></div>
+          <div class="promo-meta">★4.84 · 긍정 97.3% · 리뷰 37 · 수납/정리</div>
+          <div class="chips"><span class="chip">만족</span> <span class="chip">배송</span></div></div><div class="promo strong">
+          <div class="promo-head"><span class="badge strong">▲ 적극 추진</span>
+            <span class="pname">하프 벽트리 풀세트 4종</span></div>
+          <div class="promo-meta">★4.83 · 긍정 96.8% · 리뷰 278 · 기타</div>
+          <div class="chips"><span class="chip">예쁘다</span> <span class="chip">만족</span> <span class="chip">편하다</span> <span class="chip">배송</span></div></div><div class="promo strong">
+          <div class="promo-head"><span class="badge strong">▲ 적극 추진</span>
+            <span class="pname">층간소음방지 두툼 거실화</span></div>
+          <div class="promo-meta">★4.83 · 긍정 95.8% · 리뷰 190 · 기타</div>
+          <div class="chips"><span class="chip">편하다</span> <span class="chip">예쁘다</span> <span class="chip">만족</span> <span class="chip">가볍다</span></div></div><div class="promo strong">
+          <div class="promo-head"><span class="badge strong">▲ 적극 추진</span>
+            <span class="pname">29금 커플 주루마블</span></div>
+          <div class="promo-meta">★4.83 · 긍정 96.6% · 리뷰 89 · 기타</div>
+          <div class="chips"><span class="chip">배송</span> <span class="chip">만족</span> <span class="chip">가볍다</span></div></div><div class="promo strong">
+          <div class="promo-head"><span class="badge strong">▲ 적극 추진</span>
+            <span class="pname">만능 풀바른 벽지 모음</span></div>
+          <div class="promo-meta">★4.83 · 긍정 95.4% · 리뷰 87 · 기타</div>
+          <div class="chips"><span class="chip">편하다</span> <span class="chip">깔끔하다</span> <span class="chip">예쁘다</span> <span class="chip">만족</span></div></div><div class="promo strong">
+          <div class="promo-head"><span class="badge strong">▲ 적극 추진</span>
+            <span class="pname">폴딩선반 전신거울 화장대</span></div>
+          <div class="promo-meta">★4.83 · 긍정 96.6% · 리뷰 59 · 수납/정리</div>
+          <div class="chips"><span class="chip">만족</span> <span class="chip">깔끔하다</span> <span class="chip">배송</span> <span class="chip">예쁘다</span></div></div><div class="promo strong">
+          <div class="promo-head"><span class="badge strong">▲ 적극 추진</span>
+            <span class="pname">추가_인공태양 2.1A 듀얼 어댑터</span></div>
+          <div class="promo-meta">★4.83 · 긍정 97.8% · 리뷰 46 · 기타</div>
+          <div class="chips"><span class="chip">만족</span> <span class="chip">편하다</span> <span class="chip">예쁘다</span> <span class="chip">배송</span></div></div><div class="promo strong">
+          <div class="promo-head"><span class="badge strong">▲ 적극 추진</span>
+            <span class="pname">추가_듀라맥스 냉감 베개커버</span></div>
+          <div class="promo-meta">★4.83 · 긍정 95.7% · 리뷰 46 · 침구/매트리스</div>
+          <div class="chips"><span class="chip">시원하다</span> <span class="chip">만족</span> <span class="chip">편하다</span> <span class="chip">배송</span></div></div><div class="promo strong">
+          <div class="promo-head"><span class="badge strong">▲ 적극 추진</span>
+            <span class="pname">가성비 pp 침대 깔판</span></div>
+          <div class="promo-meta">★4.83 · 긍정 97.8% · 리뷰 46 · 기타</div>
+          <div class="chips"><span class="chip">만족</span> <span class="chip">튼튼하다</span> <span class="chip">저렴/가성비</span> <span class="chip">가볍다</span></div></div><div class="promo strong">
+          <div class="promo-head"><span class="badge strong">▲ 적극 추진</span>
+            <span class="pname">초미니 키링 마우스</span></div>
+          <div class="promo-meta">★4.83 · 긍정 97.2% · 리뷰 36 · 기타</div>
+          <div class="chips"><span class="chip">만족</span> <span class="chip">편하다</span> <span class="chip">시원하다</span> <span class="chip">예쁘다</span></div></div><div class="promo strong">
+          <div class="promo-head"><span class="badge strong">▲ 적극 추진</span>
+            <span class="pname">라운드 접이식테이블 모음</span></div>
+          <div class="promo-meta">★4.83 · 긍정 100.0% · 리뷰 36 · 기타</div>
+          <div class="chips"><span class="chip">만족</span> <span class="chip">예쁘다</span> <span class="chip">배송</span> <span class="chip">깔끔하다</span></div></div><div class="promo strong">
+          <div class="promo-head"><span class="badge strong">▲ 적극 추진</span>
+            <span class="pname">라미 멀티 책장형 침대</span></div>
+          <div class="promo-meta">★4.83 · 긍정 97.1% · 리뷰 35 · 기타</div>
+          <div class="chips"><span class="chip">예쁘다</span> <span class="chip">만족</span> <span class="chip">배송</span> <span class="chip">튼튼하다</span></div></div><div class="promo strong">
+          <div class="promo-head"><span class="badge strong">▲ 적극 추진</span>
+            <span class="pname">큐티 애니멀 발매트 모음</span></div>
+          <div class="promo-meta">★4.83 · 긍정 96.7% · 리뷰 30 · 욕실/화장실</div>
+          <div class="chips"><span class="chip">배송</span> <span class="chip">예쁘다</span> <span class="chip">만족</span> <span class="chip">부드럽다</span></div></div><div class="promo strong">
+          <div class="promo-head"><span class="badge strong">▲ 적극 추진</span>
+            <span class="pname">초대형 6인치 손선풍기</span></div>
+          <div class="promo-meta">★4.82 · 긍정 96.1% · 리뷰 492 · 계절가전</div>
+          <div class="chips"><span class="chip">시원하다</span> <span class="chip">만족</span> <span class="chip">넉넉하다</span> <span class="chip">배송</span></div></div><div class="promo strong">
+          <div class="promo-head"><span class="badge strong">▲ 적극 추진</span>
+            <span class="pname">고리회전형 논슬립옷걸이</span></div>
+          <div class="promo-meta">★4.82 · 긍정 95.5% · 리뷰 491 · 수납/정리</div>
+          <div class="chips"><span class="chip">만족</span> <span class="chip">튼튼하다</span> <span class="chip">저렴/가성비</span> <span class="chip">예쁘다</span></div></div><div class="promo strong">
+          <div class="promo-head"><span class="badge strong">▲ 적극 추진</span>
+            <span class="pname">다용도 앞접시 미니국자</span></div>
+          <div class="promo-meta">★4.82 · 긍정 97.2% · 리뷰 283 · 기타</div>
+          <div class="chips"><span class="chip">만족</span> <span class="chip">편하다</span> <span class="chip">예쁘다</span> <span class="chip">배송</span></div></div><div class="promo strong">
+          <div class="promo-head"><span class="badge strong">▲ 적극 추진</span>
+            <span class="pname">어깨뿔방지 옷걸이 50P</span></div>
+          <div class="promo-meta">★4.82 · 긍정 96.3% · 리뷰 269 · 수납/정리</div>
+          <div class="chips"><span class="chip">만족</span> <span class="chip">저렴/가성비</span> <span class="chip">튼튼하다</span> <span class="chip">배송</span></div></div><div class="promo strong">
+          <div class="promo-head"><span class="badge strong">▲ 적극 추진</span>
+            <span class="pname">추가_더버매트 전용커버</span></div>
+          <div class="promo-meta">★4.82 · 긍정 96.6% · 리뷰 207 · 침구/매트리스</div>
+          <div class="chips"><span class="chip">만족</span> <span class="chip">따뜻하다</span> <span class="chip">편하다</span> <span class="chip">깔끔하다</span></div></div><div class="promo strong">
+          <div class="promo-head"><span class="badge strong">▲ 적극 추진</span>
+            <span class="pname">사이잘룩 사계절 러그</span></div>
+          <div class="promo-meta">★4.82 · 긍정 97.5% · 리뷰 202 · 인테리어/소품</div>
+          <div class="chips"><span class="chip">만족</span> <span class="chip">예쁘다</span> <span class="chip">저렴/가성비</span> <span class="chip">깔끔하다</span></div></div><div class="promo strong">
+          <div class="promo-head"><span class="badge strong">▲ 적극 추진</span>
+            <span class="pname">JMW 접이식 에어플립</span></div>
+          <div class="promo-meta">★4.82 · 긍정 96.9% · 리뷰 129 · 기타</div>
+          <div class="chips"><span class="chip">만족</span> <span class="chip">예쁘다</span> <span class="chip">가볍다</span> <span class="chip">편하다</span></div></div><div class="promo strong">
+          <div class="promo-head"><span class="badge strong">▲ 적극 추진</span>
+            <span class="pname">카카오 셀피 어른이카메라</span></div>
+          <div class="promo-meta">★4.82 · 긍정 97.1% · 리뷰 103 · 기타</div>
+          <div class="chips"><span class="chip">만족</span> <span class="chip">예쁘다</span> <span class="chip">편하다</span> <span class="chip">가볍다</span></div></div><div class="promo strong">
+          <div class="promo-head"><span class="badge strong">▲ 적극 추진</span>
+            <span class="pname">간편 접이식 테이블</span></div>
+          <div class="promo-meta">★4.82 · 긍정 97.3% · 리뷰 73 · 기타</div>
+          <div class="chips"><span class="chip">편하다</span> <span class="chip">만족</span> <span class="chip">예쁘다</span> <span class="chip">가볍다</span></div></div><div class="promo strong">
+          <div class="promo-head"><span class="badge strong">▲ 적극 추진</span>
+            <span class="pname">에어프라이어 1.5L&amp;토스터</span></div>
+          <div class="promo-meta">★4.82 · 긍정 97.7% · 리뷰 44 · 기타</div>
+          <div class="chips"><span class="chip">예쁘다</span> <span class="chip">배송</span> <span class="chip">만족</span> <span class="chip">편하다</span></div></div><div class="promo strong">
+          <div class="promo-head"><span class="badge strong">▲ 적극 추진</span>
+            <span class="pname">철제 마그넷 우산꽂이</span></div>
+          <div class="promo-meta">★4.82 · 긍정 95.5% · 리뷰 44 · 기타</div>
+          <div class="chips"><span class="chip">튼튼하다</span> <span class="chip">만족</span> <span class="chip">편하다</span> <span class="chip">깔끔하다</span></div></div><div class="promo strong">
+          <div class="promo-head"><span class="badge strong">▲ 적극 추진</span>
+            <span class="pname">투웨이 밀폐 용기 2탄</span></div>
+          <div class="promo-meta">★4.82 · 긍정 100.0% · 리뷰 40 · 주방/식기</div>
+          <div class="chips"><span class="chip">편하다</span> <span class="chip">가볍다</span> <span class="chip">저렴/가성비</span> <span class="chip">만족</span></div></div><div class="promo strong">
+          <div class="promo-head"><span class="badge strong">▲ 적극 추진</span>
+            <span class="pname">부드러운 사계절 차렵이불</span></div>
+          <div class="promo-meta">★4.81 · 긍정 95.4% · 리뷰 504 · 침구/매트리스</div>
+          <div class="chips"><span class="chip">따뜻하다</span> <span class="chip">만족</span> <span class="chip">예쁘다</span> <span class="chip">배송</span></div></div><div class="promo strong">
+          <div class="promo-head"><span class="badge strong">▲ 적극 추진</span>
+            <span class="pname">가벼운 초강력 청소기</span></div>
+          <div class="promo-meta">★4.81 · 긍정 95.8% · 리뷰 456 · 청소/세탁</div>
+          <div class="chips"><span class="chip">만족</span> <span class="chip">저렴/가성비</span> <span class="chip">가볍다</span> <span class="chip">편하다</span></div></div><div class="promo strong">
+          <div class="promo-head"><span class="badge strong">▲ 적극 추진</span>
+            <span class="pname">아치형 스티커 포스터</span></div>
+          <div class="promo-meta">★4.81 · 긍정 95.2% · 리뷰 105 · 인테리어/소품</div>
+          <div class="chips"><span class="chip">예쁘다</span> <span class="chip">만족</span> <span class="chip">배송</span> <span class="chip">시원하다</span></div></div><div class="promo strong">
+          <div class="promo-head"><span class="badge strong">▲ 적극 추진</span>
+            <span class="pname">먼지없는 사계절 차렵이불</span></div>
+          <div class="promo-meta">★4.81 · 긍정 96.2% · 리뷰 104 · 침구/매트리스</div>
+          <div class="chips"><span class="chip">따뜻하다</span> <span class="chip">만족</span> <span class="chip">예쁘다</span> <span class="chip">가볍다</span></div></div><div class="promo strong">
+          <div class="promo-head"><span class="badge strong">▲ 적극 추진</span>
+            <span class="pname">LED 은하수 무드등</span></div>
+          <div class="promo-meta">★4.81 · 긍정 97.1% · 리뷰 68 · 생활가전</div>
+          <div class="chips"><span class="chip">예쁘다</span> <span class="chip">만족</span> <span class="chip">배송</span> <span class="chip">편하다</span></div></div><div class="promo strong">
+          <div class="promo-head"><span class="badge strong">▲ 적극 추진</span>
+            <span class="pname">고데기 거치대</span></div>
+          <div class="promo-meta">★4.81 · 긍정 96.2% · 리뷰 53 · 수납/정리</div>
+          <div class="chips"><span class="chip">깔끔하다</span> <span class="chip">튼튼하다</span> <span class="chip">편하다</span> <span class="chip">예쁘다</span></div></div><div class="promo strong">
+          <div class="promo-head"><span class="badge strong">▲ 적극 추진</span>
+            <span class="pname">소이 냄비/멀티팬 시리즈</span></div>
+          <div class="promo-meta">★4.81 · 긍정 96.9% · 리뷰 32 · 주방/식기</div>
+          <div class="chips"><span class="chip">예쁘다</span> <span class="chip">만족</span> <span class="chip">배송</span> <span class="chip">깔끔하다</span></div></div><div class="promo strong">
+          <div class="promo-head"><span class="badge strong">▲ 적극 추진</span>
+            <span class="pname">논슬립 바지걸이 20P</span></div>
+          <div class="promo-meta">★4.81 · 긍정 96.8% · 리뷰 31 · 수납/정리</div>
+          <div class="chips"><span class="chip">만족</span> <span class="chip">깔끔하다</span> <span class="chip">고급스럽다</span> <span class="chip">편하다</span></div></div><div class="promo strong">
+          <div class="promo-head"><span class="badge strong">▲ 적극 추진</span>
+            <span class="pname">메종드꼼마 식탁의자 모음</span></div>
+          <div class="promo-meta">★4.81 · 긍정 96.8% · 리뷰 31 · 기타</div>
+          <div class="chips"><span class="chip">편하다</span> <span class="chip">예쁘다</span> <span class="chip">만족</span> <span class="chip">설치쉬움</span></div></div><div class="promo strong">
+          <div class="promo-head"><span class="badge strong">▲ 적극 추진</span>
+            <span class="pname">무볼트 드레스룸 행거</span></div>
+          <div class="promo-meta">★4.80 · 긍정 95.5% · 리뷰 716 · 수납/정리</div>
+          <div class="chips"><span class="chip">튼튼하다</span> <span class="chip">만족</span> <span class="chip">깔끔하다</span> <span class="chip">예쁘다</span></div></div><div class="promo strong">
+          <div class="promo-head"><span class="badge strong">▲ 적극 추진</span>
+            <span class="pname">자동 불끄기 스위치</span></div>
+          <div class="promo-meta">★4.79 · 긍정 95.8% · 리뷰 447 · 기타</div>
+          <div class="chips"><span class="chip">편하다</span> <span class="chip">만족</span> <span class="chip">배송</span> <span class="chip">저렴/가성비</span></div></div><div class="promo strong">
+          <div class="promo-head"><span class="badge strong">▲ 적극 추진</span>
+            <span class="pname">스마트 센서 휴지통</span></div>
+          <div class="promo-meta">★4.79 · 긍정 95.2% · 리뷰 147 · 주방/식기</div>
+          <div class="chips"><span class="chip">편하다</span> <span class="chip">만족</span> <span class="chip">예쁘다</span> <span class="chip">배송</span></div></div><div class="promo strong">
+          <div class="promo-head"><span class="badge strong">▲ 적극 추진</span>
+            <span class="pname">해충퇴치 분필형 신기패</span></div>
+          <div class="promo-meta">★4.79 · 긍정 97.8% · 리뷰 91 · 기타</div>
+          <div class="chips"><span class="chip">만족</span> <span class="chip">편하다</span> <span class="chip">배송</span> <span class="chip">설치쉬움</span></div></div><div class="promo strong">
+          <div class="promo-head"><span class="badge strong">▲ 적극 추진</span>
+            <span class="pname">찹쌀떡 필로우</span></div>
+          <div class="promo-meta">★4.79 · 긍정 97.7% · 리뷰 43 · 기타</div>
+          <div class="chips"><span class="chip">시원하다</span> <span class="chip">편하다</span> <span class="chip">만족</span> <span class="chip">예쁘다</span></div></div><div class="promo strong">
+          <div class="promo-head"><span class="badge strong">▲ 적극 추진</span>
+            <span class="pname">TZD 투명 폴딩의자 1+1</span></div>
+          <div class="promo-meta">★4.79 · 긍정 97.1% · 리뷰 34 · 기타</div>
+          <div class="chips"><span class="chip">만족</span> <span class="chip">예쁘다</span> <span class="chip">튼튼하다</span> <span class="chip">편하다</span></div></div><div class="promo strong">
+          <div class="promo-head"><span class="badge strong">▲ 적극 추진</span>
+            <span class="pname">병풍 용돈 봉투</span></div>
+          <div class="promo-meta">★4.79 · 긍정 97.0% · 리뷰 33 · 기타</div>
+          <div class="chips"><span class="chip">배송</span> <span class="chip">만족</span> <span class="chip">예쁘다</span> <span class="chip">튼튼하다</span></div></div><div class="promo strong">
+          <div class="promo-head"><span class="badge strong">▲ 적극 추진</span>
+            <span class="pname">루아베 간절기 차렵이불</span></div>
+          <div class="promo-meta">★4.79 · 긍정 97.0% · 리뷰 33 · 침구/매트리스</div>
+          <div class="chips"><span class="chip">따뜻하다</span> <span class="chip">저렴/가성비</span> <span class="chip">예쁘다</span> <span class="chip">만족</span></div></div><div class="promo strong">
+          <div class="promo-head"><span class="badge strong">▲ 적극 추진</span>
+            <span class="pname">더버한일 워셔블 탄소매트</span></div>
+          <div class="promo-meta">★4.78 · 긍정 95.0% · 리뷰 1,292 · 인테리어/소품</div>
+          <div class="chips"><span class="chip">따뜻하다</span> <span class="chip">만족</span> <span class="chip">저렴/가성비</span> <span class="chip">배송</span></div></div><div class="promo strong">
+          <div class="promo-head"><span class="badge strong">▲ 적극 추진</span>
+            <span class="pname">추가_암막 커튼 끈 / 집게</span></div>
+          <div class="promo-meta">★4.78 · 긍정 95.7% · 리뷰 232 · 인테리어/소품</div>
+          <div class="chips"><span class="chip">만족</span> <span class="chip">편하다</span> <span class="chip">예쁘다</span> <span class="chip">배송</span></div></div><div class="promo strong">
+          <div class="promo-head"><span class="badge strong">▲ 적극 추진</span>
+            <span class="pname">칸칸이 뚜껑 속옷정리함</span></div>
+          <div class="promo-meta">★4.78 · 긍정 96.9% · 리뷰 98 · 수납/정리</div>
+          <div class="chips"><span class="chip">만족</span> <span class="chip">깔끔하다</span> <span class="chip">편하다</span> <span class="chip">배송</span></div></div><div class="promo strong">
+          <div class="promo-head"><span class="badge strong">▲ 적극 추진</span>
+            <span class="pname">에어롤 헤어스타일러 PRO</span></div>
+          <div class="promo-meta">★4.78 · 긍정 95.1% · 리뷰 41 · 기타</div>
+          <div class="chips"><span class="chip">만족</span> <span class="chip">예쁘다</span> <span class="chip">가볍다</span> <span class="chip">저렴/가성비</span></div></div><div class="promo strong">
+          <div class="promo-head"><span class="badge strong">▲ 적극 추진</span>
+            <span class="pname">페블 3단 분리수거함</span></div>
+          <div class="promo-meta">★4.78 · 긍정 95.0% · 리뷰 40 · 기타</div>
+          <div class="chips"><span class="chip">만족</span> <span class="chip">깔끔하다</span> <span class="chip">예쁘다</span> <span class="chip">편하다</span></div></div><div class="promo strong">
+          <div class="promo-head"><span class="badge strong">▲ 적극 추진</span>
+            <span class="pname">야광 스틱 100P 세트</span></div>
+          <div class="promo-meta">★4.78 · 긍정 96.9% · 리뷰 32 · 기타</div>
+          <div class="chips"><span class="chip">예쁘다</span> <span class="chip">배송</span> <span class="chip">저렴/가성비</span> <span class="chip">만족</span></div></div><div class="promo strong">
+          <div class="promo-head"><span class="badge strong">▲ 적극 추진</span>
+            <span class="pname">새지 않는 빨대텀블러 1L</span></div>
+          <div class="promo-meta">★4.77 · 긍정 95.2% · 리뷰 250 · 주방/식기</div>
+          <div class="chips"><span class="chip">만족</span> <span class="chip">예쁘다</span> <span class="chip">튼튼하다</span> <span class="chip">편하다</span></div></div><div class="promo strong">
+          <div class="promo-head"><span class="badge strong">▲ 적극 추진</span>
+            <span class="pname">자르고 붙이는 블라인드</span></div>
+          <div class="promo-meta">★4.77 · 긍정 95.3% · 리뷰 234 · 인테리어/소품</div>
+          <div class="chips"><span class="chip">편하다</span> <span class="chip">만족</span> <span class="chip">저렴/가성비</span> <span class="chip">설치쉬움</span></div></div><div class="promo strong">
+          <div class="promo-head"><span class="badge strong">▲ 적극 추진</span>
+            <span class="pname">논슬립 회전형 옷걸이 50P</span></div>
+          <div class="promo-meta">★4.77 · 긍정 95.2% · 리뷰 104 · 수납/정리</div>
+          <div class="chips"><span class="chip">만족</span> <span class="chip">튼튼하다</span> <span class="chip">깔끔하다</span> <span class="chip">저렴/가성비</span></div></div><div class="promo strong">
+          <div class="promo-head"><span class="badge strong">▲ 적극 추진</span>
+            <span class="pname">와이드뷰 32인치 TV</span></div>
+          <div class="promo-meta">★4.76 · 긍정 95.2% · 리뷰 63 · 기타</div>
+          <div class="chips"><span class="chip">저렴/가성비</span> <span class="chip">만족</span> <span class="chip">배송</span> <span class="chip">편하다</span></div></div><div class="promo strong">
+          <div class="promo-head"><span class="badge strong">▲ 적극 추진</span>
+            <span class="pname">셀프 에어컨청소 풀세트</span></div>
+          <div class="promo-meta">★4.76 · 긍정 95.9% · 리뷰 49 · 청소/세탁</div>
+          <div class="chips"><span class="chip">만족</span> <span class="chip">배송</span> <span class="chip">편하다</span> <span class="chip">깔끔하다</span></div></div><div class="promo strong">
+          <div class="promo-head"><span class="badge strong">▲ 적극 추진</span>
+            <span class="pname">올인원 심플 행거</span></div>
+          <div class="promo-meta">★4.76 · 긍정 97.6% · 리뷰 42 · 수납/정리</div>
+          <div class="chips"><span class="chip">튼튼하다</span> <span class="chip">예쁘다</span> <span class="chip">배송</span> <span class="chip">깔끔하다</span></div></div><div class="promo strong">
+          <div class="promo-head"><span class="badge strong">▲ 적극 추진</span>
+            <span class="pname">튼튼한 문걸이 빨래건조대</span></div>
+          <div class="promo-meta">★4.75 · 긍정 96.6% · 리뷰 59 · 청소/세탁</div>
+          <div class="chips"><span class="chip">튼튼하다</span> <span class="chip">만족</span> <span class="chip">편하다</span> <span class="chip">설치쉬움</span></div></div><div class="promo strong">
+          <div class="promo-head"><span class="badge strong">▲ 적극 추진</span>
+            <span class="pname">벌레차단 창문 틈막이</span></div>
+          <div class="promo-meta">★4.75 · 긍정 97.2% · 리뷰 36 · 기타</div>
+          <div class="chips"><span class="chip">배송</span> <span class="chip">만족</span> <span class="chip">편하다</span> <span class="chip">깔끔하다</span></div></div>
+  <h3>△ 추진 검토</h3><div class="promo consider">
+          <div class="promo-head"><span class="badge consider">△ 추진 검토</span>
+            <span class="pname">카카오 무선 워치 충전기</span></div>
+          <div class="promo-meta">★4.86 · 긍정 94.8% · 리뷰 58 · 생활가전</div>
+          <div class="chips"><span class="chip">편하다</span> <span class="chip">예쁘다</span> <span class="chip">만족</span> <span class="chip">설치쉬움</span></div></div><div class="promo consider">
+          <div class="promo-head"><span class="badge consider">△ 추진 검토</span>
+            <span class="pname">브리타 필터정수기 6종</span></div>
+          <div class="promo-meta">★4.85 · 긍정 94.7% · 리뷰 75 · 생활가전</div>
+          <div class="chips"><span class="chip">만족</span> <span class="chip">편하다</span> <span class="chip">배송</span> <span class="chip">저렴/가성비</span></div></div><div class="promo consider">
+          <div class="promo-head"><span class="badge consider">△ 추진 검토</span>
+            <span class="pname">3초 온수 포트</span></div>
+          <div class="promo-meta">★4.85 · 긍정 93.3% · 리뷰 60 · 생활가전</div>
+          <div class="chips"><span class="chip">편하다</span> <span class="chip">만족</span> <span class="chip">따뜻하다</span> <span class="chip">배송</span></div></div><div class="promo consider">
+          <div class="promo-head"><span class="badge consider">△ 추진 검토</span>
+            <span class="pname">달고나 만들기 세트</span></div>
+          <div class="promo-meta">★4.85 · 긍정 94.2% · 리뷰 52 · 기타</div>
+          <div class="chips"><span class="chip">만족</span> <span class="chip">배송</span> <span class="chip">저렴/가성비</span> <span class="chip">예쁘다</span></div></div><div class="promo consider">
+          <div class="promo-head"><span class="badge consider">△ 추진 검토</span>
+            <span class="pname">치고야 에어프라이어 5L</span></div>
+          <div class="promo-meta">★4.85 · 긍정 94.1% · 리뷰 34 · 기타</div>
+          <div class="chips"><span class="chip">만족</span> <span class="chip">저렴/가성비</span> <span class="chip">예쁘다</span> <span class="chip">배송</span></div></div><div class="promo consider">
+          <div class="promo-head"><span class="badge consider">△ 추진 검토</span>
+            <span class="pname">캡슐형 세탁조 클리너</span></div>
+          <div class="promo-meta">★4.84 · 긍정 94.7% · 리뷰 38 · 청소/세탁</div>
+          <div class="chips"><span class="chip">편하다</span> <span class="chip">배송</span> <span class="chip">만족</span> <span class="chip">깔끔하다</span></div></div><div class="promo consider">
+          <div class="promo-head"><span class="badge consider">△ 추진 검토</span>
+            <span class="pname">공간분리 화장품 정리함</span></div>
+          <div class="promo-meta">★4.83 · 긍정 95.0% · 리뷰 159 · 수납/정리</div>
+          <div class="chips"><span class="chip">만족</span> <span class="chip">깔끔하다</span> <span class="chip">배송</span> <span class="chip">편하다</span></div></div><div class="promo consider">
+          <div class="promo-head"><span class="badge consider">△ 추진 검토</span>
+            <span class="pname">라인 메모리폼 발매트</span></div>
+          <div class="promo-meta">★4.83 · 긍정 94.2% · 리뷰 52 · 욕실/화장실</div>
+          <div class="chips"><span class="chip">만족</span> <span class="chip">예쁘다</span> <span class="chip">편하다</span> <span class="chip">저렴/가성비</span></div></div><div class="promo consider">
+          <div class="promo-head"><span class="badge consider">△ 추진 검토</span>
+            <span class="pname">무선 빈티지 무드등</span></div>
+          <div class="promo-meta">★4.82 · 긍정 92.4% · 리뷰 66 · 생활가전</div>
+          <div class="chips"><span class="chip">예쁘다</span> <span class="chip">만족</span> <span class="chip">배송</span> <span class="chip">저렴/가성비</span></div></div><div class="promo consider">
+          <div class="promo-head"><span class="badge consider">△ 추진 검토</span>
+            <span class="pname">홈던트 무볼트 시스템행거</span></div>
+          <div class="promo-meta">★4.82 · 긍정 92.1% · 리뷰 38 · 수납/정리</div>
+          <div class="chips"><span class="chip">만족</span> <span class="chip">튼튼하다</span> <span class="chip">깔끔하다</span> <span class="chip">배송</span></div></div><div class="promo consider">
+          <div class="promo-head"><span class="badge consider">△ 추진 검토</span>
+            <span class="pname">알러리스 밴딩형 토퍼</span></div>
+          <div class="promo-meta">★4.81 · 긍정 93.9% · 리뷰 247 · 침구/매트리스</div>
+          <div class="chips"><span class="chip">만족</span> <span class="chip">따뜻하다</span> <span class="chip">편하다</span> <span class="chip">배송</span></div></div><div class="promo consider">
+          <div class="promo-head"><span class="badge consider">△ 추진 검토</span>
+            <span class="pname">탱크 빨래건조대 모음</span></div>
+          <div class="promo-meta">★4.81 · 긍정 93.8% · 리뷰 242 · 청소/세탁</div>
+          <div class="chips"><span class="chip">튼튼하다</span> <span class="chip">만족</span> <span class="chip">배송</span> <span class="chip">편하다</span></div></div><div class="promo consider">
+          <div class="promo-head"><span class="badge consider">△ 추진 검토</span>
+            <span class="pname">레벨업 확장형 드레스룸</span></div>
+          <div class="promo-meta">★4.81 · 긍정 94.7% · 리뷰 113 · 기타</div>
+          <div class="chips"><span class="chip">튼튼하다</span> <span class="chip">깔끔하다</span> <span class="chip">만족</span> <span class="chip">예쁘다</span></div></div><div class="promo consider">
+          <div class="promo-head"><span class="badge consider">△ 추진 검토</span>
+            <span class="pname">대왕 소주잔 1+1</span></div>
+          <div class="promo-meta">★4.81 · 긍정 91.6% · 리뷰 95 · 기타</div>
+          <div class="chips"><span class="chip">만족</span> <span class="chip">예쁘다</span> <span class="chip">배송</span> <span class="chip">편하다</span></div></div><div class="promo consider">
+          <div class="promo-head"><span class="badge consider">△ 추진 검토</span>
+            <span class="pname">시어서커 여름 차렵 침구</span></div>
+          <div class="promo-meta">★4.81 · 긍정 94.8% · 리뷰 77 · 침구/매트리스</div>
+          <div class="chips"><span class="chip">시원하다</span> <span class="chip">예쁘다</span> <span class="chip">가볍다</span> <span class="chip">배송</span></div></div><div class="promo consider">
+          <div class="promo-head"><span class="badge consider">△ 추진 검토</span>
+            <span class="pname">베베 양털 방한 커튼</span></div>
+          <div class="promo-meta">★4.81 · 긍정 94.4% · 리뷰 72 · 인테리어/소품</div>
+          <div class="chips"><span class="chip">만족</span> <span class="chip">따뜻하다</span> <span class="chip">예쁘다</span> <span class="chip">배송</span></div></div><div class="promo consider">
+          <div class="promo-head"><span class="badge consider">△ 추진 검토</span>
+            <span class="pname">클립형 치약 걸이</span></div>
+          <div class="promo-meta">★4.81 · 긍정 91.5% · 리뷰 59 · 수납/정리</div>
+          <div class="chips"><span class="chip">깔끔하다</span> <span class="chip">편하다</span> <span class="chip">만족</span> <span class="chip">튼튼하다</span></div></div><div class="promo consider">
+          <div class="promo-head"><span class="badge consider">△ 추진 검토</span>
+            <span class="pname">뽀글이 조각 매트 10장</span></div>
+          <div class="promo-meta">★4.81 · 긍정 93.0% · 리뷰 57 · 인테리어/소품</div>
+          <div class="chips"><span class="chip">따뜻하다</span> <span class="chip">예쁘다</span> <span class="chip">배송</span> <span class="chip">만족</span></div></div><div class="promo consider">
+          <div class="promo-head"><span class="badge consider">△ 추진 검토</span>
+            <span class="pname">[단종]스마트 미니 건조기 4kg</span></div>
+          <div class="promo-meta">★4.81 · 긍정 91.9% · 리뷰 37 · 청소/세탁</div>
+          <div class="chips"><span class="chip">배송</span> <span class="chip">만족</span> <span class="chip">편하다</span> <span class="chip">저렴/가성비</span></div></div><div class="promo consider">
+          <div class="promo-head"><span class="badge consider">△ 추진 검토</span>
+            <span class="pname">웰럭스 지퍼형 베개솜 4종</span></div>
+          <div class="promo-meta">★4.81 · 긍정 94.6% · 리뷰 37 · 침구/매트리스</div>
+          <div class="chips"><span class="chip">만족</span> <span class="chip">편하다</span> <span class="chip">예쁘다</span> <span class="chip">저렴/가성비</span></div></div><div class="promo consider">
+          <div class="promo-head"><span class="badge consider">△ 추진 검토</span>
+            <span class="pname">듀얼 노래방 마이크</span></div>
+          <div class="promo-meta">★4.80 · 긍정 93.7% · 리뷰 479 · 기타</div>
+          <div class="chips"><span class="chip">만족</span> <span class="chip">배송</span> <span class="chip">가볍다</span> <span class="chip">저렴/가성비</span></div></div><div class="promo consider">
+          <div class="promo-head"><span class="badge consider">△ 추진 검토</span>
+            <span class="pname">주문제작 각인 소주잔</span></div>
+          <div class="promo-meta">★4.80 · 긍정 93.3% · 리뷰 403 · 기타</div>
+          <div class="chips"><span class="chip">예쁘다</span> <span class="chip">만족</span> <span class="chip">배송</span> <span class="chip">고급스럽다</span></div></div><div class="promo consider">
+          <div class="promo-head"><span class="badge consider">△ 추진 검토</span>
+            <span class="pname">완벽밀폐 하수구 트랩</span></div>
+          <div class="promo-meta">★4.80 · 긍정 94.4% · 리뷰 89 · 주방/식기</div>
+          <div class="chips"><span class="chip">만족</span> <span class="chip">배송</span> <span class="chip">편하다</span> <span class="chip">설치쉬움</span></div></div><div class="promo consider">
+          <div class="promo-head"><span class="badge consider">△ 추진 검토</span>
+            <span class="pname">주루마블 3종 시리즈</span></div>
+          <div class="promo-meta">★4.80 · 긍정 91.4% · 리뷰 70 · 기타</div>
+          <div class="chips"><span class="chip">배송</span> <span class="chip">만족</span> <span class="chip">깔끔하다</span> <span class="chip">고급스럽다</span></div></div><div class="promo consider">
+          <div class="promo-head"><span class="badge consider">△ 추진 검토</span>
+            <span class="pname">자국없는 벨크로 암막커튼</span></div>
+          <div class="promo-meta">★4.79 · 긍정 94.6% · 리뷰 1,006 · 인테리어/소품</div>
+          <div class="chips"><span class="chip">만족</span> <span class="chip">편하다</span> <span class="chip">튼튼하다</span> <span class="chip">설치쉬움</span></div></div><div class="promo consider">
+          <div class="promo-head"><span class="badge consider">△ 추진 검토</span>
+            <span class="pname">문걸이 선반 모음</span></div>
+          <div class="promo-meta">★4.79 · 긍정 94.0% · 리뷰 497 · 수납/정리</div>
+          <div class="chips"><span class="chip">만족</span> <span class="chip">편하다</span> <span class="chip">튼튼하다</span> <span class="chip">깔끔하다</span></div></div><div class="promo consider">
+          <div class="promo-head"><span class="badge consider">△ 추진 검토</span>
+            <span class="pname">신발정리대 슈즈렉 10P</span></div>
+          <div class="promo-meta">★4.79 · 긍정 92.5% · 리뷰 295 · 수납/정리</div>
+          <div class="chips"><span class="chip">깔끔하다</span> <span class="chip">만족</span> <span class="chip">배송</span> <span class="chip">편하다</span></div></div><div class="promo consider">
+          <div class="promo-head"><span class="badge consider">△ 추진 검토</span>
+            <span class="pname">보겐 미니 국자+받침 세트</span></div>
+          <div class="promo-meta">★4.79 · 긍정 94.6% · 리뷰 184 · 기타</div>
+          <div class="chips"><span class="chip">만족</span> <span class="chip">편하다</span> <span class="chip">예쁘다</span> <span class="chip">배송</span></div></div><div class="promo consider">
+          <div class="promo-head"><span class="badge consider">△ 추진 검토</span>
+            <span class="pname">안개 가습기 3종</span></div>
+          <div class="promo-meta">★4.79 · 긍정 91.1% · 리뷰 56 · 계절가전</div>
+          <div class="chips"><span class="chip">예쁘다</span> <span class="chip">만족</span> <span class="chip">편하다</span> <span class="chip">배송</span></div></div><div class="promo consider">
+          <div class="promo-head"><span class="badge consider">△ 추진 검토</span>
+            <span class="pname">[단종]무소음 휴지통 모음</span></div>
+          <div class="promo-meta">★4.79 · 긍정 94.2% · 리뷰 52 · 주방/식기</div>
+          <div class="chips"><span class="chip">예쁘다</span> <span class="chip">깔끔하다</span> <span class="chip">만족</span> <span class="chip">조용하다</span></div></div><div class="promo consider">
+          <div class="promo-head"><span class="badge consider">△ 추진 검토</span>
+            <span class="pname">토일렛퍼퓸 20ml X 3개</span></div>
+          <div class="promo-meta">★4.79 · 긍정 91.7% · 리뷰 48 · 기타</div>
+          <div class="chips"><span class="chip">만족</span> <span class="chip">편하다</span> <span class="chip">배송</span> <span class="chip">시원하다</span></div></div><div class="promo consider">
+          <div class="promo-head"><span class="badge consider">△ 추진 검토</span>
+            <span class="pname">잠자는 고양이 무드등</span></div>
+          <div class="promo-meta">★4.79 · 긍정 91.7% · 리뷰 48 · 생활가전</div>
+          <div class="chips"><span class="chip">예쁘다</span> <span class="chip">배송</span> <span class="chip">만족</span> <span class="chip">편하다</span></div></div><div class="promo consider">
+          <div class="promo-head"><span class="badge consider">△ 추진 검토</span>
+            <span class="pname">스폰지밥 수건 2P 3종</span></div>
+          <div class="promo-meta">★4.79 · 긍정 92.3% · 리뷰 39 · 욕실/화장실</div>
+          <div class="chips"><span class="chip">예쁘다</span> <span class="chip">배송</span> <span class="chip">깔끔하다</span></div></div><div class="promo consider">
+          <div class="promo-head"><span class="badge consider">△ 추진 검토</span>
+            <span class="pname">1인용 접이식 간이침대</span></div>
+          <div class="promo-meta">★4.79 · 긍정 94.9% · 리뷰 39 · 기타</div>
+          <div class="chips"><span class="chip">편하다</span> <span class="chip">만족</span> <span class="chip">배송</span> <span class="chip">가볍다</span></div></div><div class="promo consider">
+          <div class="promo-head"><span class="badge consider">△ 추진 검토</span>
+            <span class="pname">원터치 이동식 분리수거함</span></div>
+          <div class="promo-meta">★4.79 · 긍정 93.9% · 리뷰 33 · 기타</div>
+          <div class="chips"><span class="chip">만족</span> <span class="chip">튼튼하다</span> <span class="chip">깔끔하다</span> <span class="chip">편하다</span></div></div><div class="promo consider">
+          <div class="promo-head"><span class="badge consider">△ 추진 검토</span>
+            <span class="pname">중소바이미 TV 세트</span></div>
+          <div class="promo-meta">★4.78 · 긍정 93.8% · 리뷰 384 · 기타</div>
+          <div class="chips"><span class="chip">만족</span> <span class="chip">저렴/가성비</span> <span class="chip">편하다</span> <span class="chip">배송</span></div></div><div class="promo consider">
+          <div class="promo-head"><span class="badge consider">△ 추진 검토</span>
+            <span class="pname">이지라이트 저당밥솥</span></div>
+          <div class="promo-meta">★4.78 · 긍정 94.8% · 리뷰 270 · 생활가전</div>
+          <div class="chips"><span class="chip">만족</span> <span class="chip">편하다</span> <span class="chip">예쁘다</span> <span class="chip">설치쉬움</span></div></div><div class="promo consider">
+          <div class="promo-head"><span class="badge consider">△ 추진 검토</span>
+            <span class="pname">조립식 신발정리대 모음</span></div>
+          <div class="promo-meta">★4.78 · 긍정 93.9% · 리뷰 147 · 수납/정리</div>
+          <div class="chips"><span class="chip">만족</span> <span class="chip">깔끔하다</span> <span class="chip">튼튼하다</span> <span class="chip">편하다</span></div></div><div class="promo consider">
+          <div class="promo-head"><span class="badge consider">△ 추진 검토</span>
+            <span class="pname">다이닝 매직 푸드워머</span></div>
+          <div class="promo-meta">★4.78 · 긍정 94.6% · 리뷰 147 · 기타</div>
+          <div class="chips"><span class="chip">따뜻하다</span> <span class="chip">만족</span> <span class="chip">배송</span> <span class="chip">예쁘다</span></div></div><div class="promo consider">
+          <div class="promo-head"><span class="badge consider">△ 추진 검토</span>
+            <span class="pname">미닉스 미니 건조기 PRO+</span></div>
+          <div class="promo-meta">★4.78 · 긍정 94.7% · 리뷰 132 · 청소/세탁</div>
+          <div class="chips"><span class="chip">만족</span> <span class="chip">편하다</span> <span class="chip">예쁘다</span> <span class="chip">저렴/가성비</span></div></div><div class="promo consider">
+          <div class="promo-head"><span class="badge consider">△ 추진 검토</span>
+            <span class="pname">실크 극세사 차렵 침구</span></div>
+          <div class="promo-meta">★4.78 · 긍정 93.0% · 리뷰 129 · 침구/매트리스</div>
+          <div class="chips"><span class="chip">따뜻하다</span> <span class="chip">만족</span> <span class="chip">배송</span> <span class="chip">예쁘다</span></div></div><div class="promo consider">
+          <div class="promo-head"><span class="badge consider">△ 추진 검토</span>
+            <span class="pname">드라이기 홀더</span></div>
+          <div class="promo-meta">★4.78 · 긍정 92.3% · 리뷰 78 · 기타</div>
+          <div class="chips"><span class="chip">편하다</span> <span class="chip">만족</span> <span class="chip">저렴/가성비</span> <span class="chip">깔끔하다</span></div></div><div class="promo consider">
+          <div class="promo-head"><span class="badge consider">△ 추진 검토</span>
+            <span class="pname">물빠짐 수저통 모음</span></div>
+          <div class="promo-meta">★4.78 · 긍정 90.8% · 리뷰 76 · 주방/식기</div>
+          <div class="chips"><span class="chip">깔끔하다</span> <span class="chip">예쁘다</span> <span class="chip">만족</span> <span class="chip">배송</span></div></div><div class="promo consider">
+          <div class="promo-head"><span class="badge consider">△ 추진 검토</span>
+            <span class="pname">대왕 모찌 오리 인형</span></div>
+          <div class="promo-meta">★4.78 · 긍정 94.5% · 리뷰 73 · 기타</div>
+          <div class="chips"><span class="chip">만족</span> <span class="chip">배송</span> <span class="chip">예쁘다</span> <span class="chip">따뜻하다</span></div></div><div class="promo consider">
+          <div class="promo-head"><span class="badge consider">△ 추진 검토</span>
+            <span class="pname">무볼트 코너 틈새 행거</span></div>
+          <div class="promo-meta">★4.78 · 긍정 93.8% · 리뷰 65 · 수납/정리</div>
+          <div class="chips"><span class="chip">튼튼하다</span> <span class="chip">편하다</span> <span class="chip">만족</span> <span class="chip">가볍다</span></div></div><div class="promo consider">
+          <div class="promo-head"><span class="badge consider">△ 추진 검토</span>
+            <span class="pname">튼튼한 리빙박스 모음</span></div>
+          <div class="promo-meta">★4.78 · 긍정 94.9% · 리뷰 59 · 수납/정리</div>
+          <div class="chips"><span class="chip">만족</span> <span class="chip">튼튼하다</span> <span class="chip">넉넉하다</span> <span class="chip">배송</span></div></div><div class="promo consider">
+          <div class="promo-head"><span class="badge consider">△ 추진 검토</span>
+            <span class="pname">도나티 유리컵 세트 모음</span></div>
+          <div class="promo-meta">★4.78 · 긍정 91.4% · 리뷰 58 · 주방/식기</div>
+          <div class="chips"><span class="chip">예쁘다</span> <span class="chip">배송</span> <span class="chip">만족</span> <span class="chip">튼튼하다</span></div></div><div class="promo consider">
+          <div class="promo-head"><span class="badge consider">△ 추진 검토</span>
+            <span class="pname">스테커블 바스켓 1+1</span></div>
+          <div class="promo-meta">★4.78 · 긍정 92.2% · 리뷰 51 · 기타</div>
+          <div class="chips"><span class="chip">튼튼하다</span> <span class="chip">예쁘다</span> <span class="chip">만족</span> <span class="chip">깔끔하다</span></div></div><div class="promo consider">
+          <div class="promo-head"><span class="badge consider">△ 추진 검토</span>
+            <span class="pname">이지스탠드 우산꽂이</span></div>
+          <div class="promo-meta">★4.78 · 긍정 93.3% · 리뷰 45 · 생활가전</div>
+          <div class="chips"><span class="chip">만족</span> <span class="chip">깔끔하다</span> <span class="chip">편하다</span> <span class="chip">예쁘다</span></div></div><div class="promo consider">
+          <div class="promo-head"><span class="badge consider">△ 추진 검토</span>
+            <span class="pname">손잡이 앞접시 4P 세트</span></div>
+          <div class="promo-meta">★4.78 · 긍정 92.7% · 리뷰 41 · 기타</div>
+          <div class="chips"><span class="chip">만족</span> <span class="chip">편하다</span> <span class="chip">예쁘다</span> <span class="chip">가볍다</span></div></div><div class="promo consider">
+          <div class="promo-head"><span class="badge consider">△ 추진 검토</span>
+            <span class="pname">라텍스 스트레칭 밴드</span></div>
+          <div class="promo-meta">★4.78 · 긍정 90.0% · 리뷰 40 · 기타</div>
+          <div class="chips"><span class="chip">배송</span> <span class="chip">만족</span> <span class="chip">튼튼하다</span> <span class="chip">깔끔하다</span></div></div><div class="promo consider">
+          <div class="promo-head"><span class="badge consider">△ 추진 검토</span>
+            <span class="pname">올인홈 롤팩 매트리스</span></div>
+          <div class="promo-meta">★4.77 · 긍정 93.0% · 리뷰 1,209 · 침구/매트리스</div>
+          <div class="chips"><span class="chip">만족</span> <span class="chip">배송</span> <span class="chip">튼튼하다</span> <span class="chip">저렴/가성비</span></div></div><div class="promo consider">
+          <div class="promo-head"><span class="badge consider">△ 추진 검토</span>
+            <span class="pname">붙였다떼는 포스터 38종</span></div>
+          <div class="promo-meta">★4.77 · 긍정 94.1% · 리뷰 337 · 인테리어/소품</div>
+          <div class="chips"><span class="chip">예쁘다</span> <span class="chip">만족</span> <span class="chip">배송</span> <span class="chip">고급스럽다</span></div></div><div class="promo consider">
+          <div class="promo-head"><span class="badge consider">△ 추진 검토</span>
+            <span class="pname">전자파없는 카본 탄소매트</span></div>
+          <div class="promo-meta">★4.77 · 긍정 93.8% · 리뷰 162 · 인테리어/소품</div>
+          <div class="chips"><span class="chip">따뜻하다</span> <span class="chip">만족</span> <span class="chip">배송</span> <span class="chip">저렴/가성비</span></div></div><div class="promo consider">
+          <div class="promo-head"><span class="badge consider">△ 추진 검토</span>
+            <span class="pname">다용도 세척볼</span></div>
+          <div class="promo-meta">★4.77 · 긍정 94.8% · 리뷰 155 · 기타</div>
+          <div class="chips"><span class="chip">편하다</span> <span class="chip">만족</span> <span class="chip">배송</span> <span class="chip">튼튼하다</span></div></div><div class="promo consider">
+          <div class="promo-head"><span class="badge consider">△ 추진 검토</span>
+            <span class="pname">온열 코타츠 테이블</span></div>
+          <div class="promo-meta">★4.77 · 긍정 93.9% · 리뷰 66 · 기타</div>
+          <div class="chips"><span class="chip">따뜻하다</span> <span class="chip">배송</span> <span class="chip">만족</span> <span class="chip">예쁘다</span></div></div><div class="promo consider">
+          <div class="promo-head"><span class="badge consider">△ 추진 검토</span>
+            <span class="pname">주문제작 대왕 과자봉투</span></div>
+          <div class="promo-meta">★4.77 · 긍정 90.3% · 리뷰 31 · 기타</div>
+          <div class="chips"><span class="chip">배송</span> <span class="chip">만족</span> <span class="chip">고급스럽다</span> <span class="chip">예쁘다</span></div></div><div class="promo consider">
+          <div class="promo-head"><span class="badge consider">△ 추진 검토</span>
+            <span class="pname">로슬린 2인 식기 세트</span></div>
+          <div class="promo-meta">★4.76 · 긍정 91.9% · 리뷰 657 · 주방/식기</div>
+          <div class="chips"><span class="chip">예쁘다</span> <span class="chip">만족</span> <span class="chip">저렴/가성비</span> <span class="chip">깔끔하다</span></div></div><div class="promo consider">
+          <div class="promo-head"><span class="badge consider">△ 추진 검토</span>
+            <span class="pname">레트로 어른이 카메라 4종</span></div>
+          <div class="promo-meta">★4.76 · 긍정 94.6% · 리뷰 499 · 기타</div>
+          <div class="chips"><span class="chip">만족</span> <span class="chip">배송</span> <span class="chip">예쁘다</span> <span class="chip">저렴/가성비</span></div></div><div class="promo consider">
+          <div class="promo-head"><span class="badge consider">△ 추진 검토</span>
+            <span class="pname">듀라론100% 매쉬 쿨매트</span></div>
+          <div class="promo-meta">★4.76 · 긍정 94.4% · 리뷰 373 · 인테리어/소품</div>
+          <div class="chips"><span class="chip">시원하다</span> <span class="chip">만족</span> <span class="chip">배송</span> <span class="chip">저렴/가성비</span></div></div><div class="promo consider">
+          <div class="promo-head"><span class="badge consider">△ 추진 검토</span>
+            <span class="pname">아크릴 다용도 정리함</span></div>
+          <div class="promo-meta">★4.76 · 긍정 93.8% · 리뷰 144 · 수납/정리</div>
+          <div class="chips"><span class="chip">깔끔하다</span> <span class="chip">예쁘다</span> <span class="chip">만족</span> <span class="chip">편하다</span></div></div><div class="promo consider">
+          <div class="promo-head"><span class="badge consider">△ 추진 검토</span>
+            <span class="pname">찹쌀떡 대왕 베개</span></div>
+          <div class="promo-meta">★4.76 · 긍정 93.6% · 리뷰 140 · 침구/매트리스</div>
+          <div class="chips"><span class="chip">만족</span> <span class="chip">편하다</span> <span class="chip">따뜻하다</span> <span class="chip">배송</span></div></div><div class="promo consider">
+          <div class="promo-head"><span class="badge consider">△ 추진 검토</span>
+            <span class="pname">세라믹 칼가위 5P 세트</span></div>
+          <div class="promo-meta">★4.76 · 긍정 92.5% · 리뷰 94 · 주방/식기</div>
+          <div class="chips"><span class="chip">예쁘다</span> <span class="chip">만족</span> <span class="chip">가볍다</span> <span class="chip">배송</span></div></div><div class="promo consider">
+          <div class="promo-head"><span class="badge consider">△ 추진 검토</span>
+            <span class="pname">슈크림 극세사 차렵이불</span></div>
+          <div class="promo-meta">★4.76 · 긍정 91.4% · 리뷰 93 · 침구/매트리스</div>
+          <div class="chips"><span class="chip">만족</span> <span class="chip">따뜻하다</span> <span class="chip">저렴/가성비</span> <span class="chip">가볍다</span></div></div><div class="promo consider">
+          <div class="promo-head"><span class="badge consider">△ 추진 검토</span>
+            <span class="pname">토퍼/이불 초대형 세탁망</span></div>
+          <div class="promo-meta">★4.76 · 긍정 93.5% · 리뷰 92 · 침구/매트리스</div>
+          <div class="chips"><span class="chip">넉넉하다</span> <span class="chip">만족</span> <span class="chip">편하다</span> <span class="chip">배송</span></div></div><div class="promo consider">
+          <div class="promo-head"><span class="badge consider">△ 추진 검토</span>
+            <span class="pname">일회용 올인원 양치세트</span></div>
+          <div class="promo-meta">★4.76 · 긍정 90.0% · 리뷰 50 · 기타</div>
+          <div class="chips"><span class="chip">만족</span> <span class="chip">편하다</span> <span class="chip">배송</span> <span class="chip">깔끔하다</span></div></div><div class="promo consider">
+          <div class="promo-head"><span class="badge consider">△ 추진 검토</span>
+            <span class="pname">전자레인지용 밥솥</span></div>
+          <div class="promo-meta">★4.76 · 긍정 93.9% · 리뷰 49 · 생활가전</div>
+          <div class="chips"><span class="chip">편하다</span> <span class="chip">만족</span> <span class="chip">가볍다</span> <span class="chip">저렴/가성비</span></div></div><div class="promo consider">
+          <div class="promo-head"><span class="badge consider">△ 추진 검토</span>
+            <span class="pname">당기는 줄 전구</span></div>
+          <div class="promo-meta">★4.76 · 긍정 94.1% · 리뷰 34 · 생활가전</div>
+          <div class="chips"><span class="chip">예쁘다</span> <span class="chip">저렴/가성비</span> <span class="chip">편하다</span> <span class="chip">만족</span></div></div><div class="promo consider">
+          <div class="promo-head"><span class="badge consider">△ 추진 검토</span>
+            <span class="pname">대용량 화장품 정리함</span></div>
+          <div class="promo-meta">★4.75 · 긍정 94.6% · 리뷰 2,080 · 수납/정리</div>
+          <div class="chips"><span class="chip">만족</span> <span class="chip">깔끔하다</span> <span class="chip">편하다</span> <span class="chip">배송</span></div></div><div class="promo consider">
+          <div class="promo-head"><span class="badge consider">△ 추진 검토</span>
+            <span class="pname">추가_330W 청소기 추가상품</span></div>
+          <div class="promo-meta">★4.75 · 긍정 94.0% · 리뷰 1,516 · 청소/세탁</div>
+          <div class="chips"><span class="chip">만족</span> <span class="chip">저렴/가성비</span> <span class="chip">가볍다</span> <span class="chip">편하다</span></div></div><div class="promo consider">
+          <div class="promo-head"><span class="badge consider">△ 추진 검토</span>
+            <span class="pname">집순이 탈부착 후드 담요</span></div>
+          <div class="promo-meta">★4.75 · 긍정 93.5% · 리뷰 1,085 · 침구/매트리스</div>
+          <div class="chips"><span class="chip">만족</span> <span class="chip">따뜻하다</span> <span class="chip">편하다</span> <span class="chip">배송</span></div></div><div class="promo consider">
+          <div class="promo-head"><span class="badge consider">△ 추진 검토</span>
+            <span class="pname">윈도우 커버 옷장 10종</span></div>
+          <div class="promo-meta">★4.75 · 긍정 92.9% · 리뷰 310 · 침구/매트리스</div>
+          <div class="chips"><span class="chip">튼튼하다</span> <span class="chip">만족</span> <span class="chip">깔끔하다</span> <span class="chip">편하다</span></div></div><div class="promo consider">
+          <div class="promo-head"><span class="badge consider">△ 추진 검토</span>
+            <span class="pname">욕실화 3종</span></div>
+          <div class="promo-meta">★4.75 · 긍정 93.2% · 리뷰 207 · 욕실/화장실</div>
+          <div class="chips"><span class="chip">예쁘다</span> <span class="chip">편하다</span> <span class="chip">배송</span> <span class="chip">만족</span></div></div><div class="promo consider">
+          <div class="promo-head"><span class="badge consider">△ 추진 검토</span>
+            <span class="pname">미스터 펑 3종</span></div>
+          <div class="promo-meta">★4.75 · 긍정 94.7% · 리뷰 151 · 기타</div>
+          <div class="chips"><span class="chip">시원하다</span> <span class="chip">만족</span> <span class="chip">배송</span> <span class="chip">저렴/가성비</span></div></div><div class="promo consider">
+          <div class="promo-head"><span class="badge consider">△ 추진 검토</span>
+            <span class="pname">미니 음식물 쓰레기통</span></div>
+          <div class="promo-meta">★4.75 · 긍정 93.1% · 리뷰 102 · 주방/식기</div>
+          <div class="chips"><span class="chip">깔끔하다</span> <span class="chip">예쁘다</span> <span class="chip">편하다</span> <span class="chip">만족</span></div></div><div class="promo consider">
+          <div class="promo-head"><span class="badge consider">△ 추진 검토</span>
+            <span class="pname">네모네모 주먹밥 세트</span></div>
+          <div class="promo-meta">★4.75 · 긍정 91.1% · 리뷰 56 · 기타</div>
+          <div class="chips"><span class="chip">편하다</span> <span class="chip">배송</span> <span class="chip">만족</span> <span class="chip">깔끔하다</span></div></div><div class="promo consider">
+          <div class="promo-head"><span class="badge consider">△ 추진 검토</span>
+            <span class="pname">무타공 변기솔 4종</span></div>
+          <div class="promo-meta">★4.75 · 긍정 93.8% · 리뷰 48 · 욕실/화장실</div>
+          <div class="chips"><span class="chip">예쁘다</span> <span class="chip">깔끔하다</span> <span class="chip">만족</span> <span class="chip">편하다</span></div></div><div class="promo consider">
+          <div class="promo-head"><span class="badge consider">△ 추진 검토</span>
+            <span class="pname">대용량 에어프라이어 오븐</span></div>
+          <div class="promo-meta">★4.74 · 긍정 93.7% · 리뷰 1,422 · 기타</div>
+          <div class="chips"><span class="chip">예쁘다</span> <span class="chip">만족</span> <span class="chip">저렴/가성비</span> <span class="chip">배송</span></div></div><div class="promo consider">
+          <div class="promo-head"><span class="badge consider">△ 추진 검토</span>
+            <span class="pname">터치미 극세사 러그</span></div>
+          <div class="promo-meta">★4.74 · 긍정 90.6% · 리뷰 417 · 인테리어/소품</div>
+          <div class="chips"><span class="chip">만족</span> <span class="chip">따뜻하다</span> <span class="chip">예쁘다</span> <span class="chip">부드럽다</span></div></div><div class="promo consider">
+          <div class="promo-head"><span class="badge consider">△ 추진 검토</span>
+            <span class="pname">전신거울 모음</span></div>
+          <div class="promo-meta">★4.74 · 긍정 91.0% · 리뷰 201 · 인테리어/소품</div>
+          <div class="chips"><span class="chip">배송</span> <span class="chip">만족</span> <span class="chip">깔끔하다</span> <span class="chip">예쁘다</span></div></div><div class="promo consider">
+          <div class="promo-head"><span class="badge consider">△ 추진 검토</span>
+            <span class="pname">멜로우 전동드라이버 세트</span></div>
+          <div class="promo-meta">★4.74 · 긍정 94.4% · 리뷰 144 · 기타</div>
+          <div class="chips"><span class="chip">만족</span> <span class="chip">예쁘다</span> <span class="chip">편하다</span> <span class="chip">가볍다</span></div></div><div class="promo consider">
+          <div class="promo-head"><span class="badge consider">△ 추진 검토</span>
+            <span class="pname">피자 &amp; 치킨 용돈 박스</span></div>
+          <div class="promo-meta">★4.74 · 긍정 93.9% · 리뷰 99 · 수납/정리</div>
+          <div class="chips"><span class="chip">만족</span> <span class="chip">배송</span> <span class="chip">편하다</span> <span class="chip">고급스럽다</span></div></div><div class="promo consider">
+          <div class="promo-head"><span class="badge consider">△ 추진 검토</span>
+            <span class="pname">루트 게이밍 컴퓨터 책상</span></div>
+          <div class="promo-meta">★4.74 · 긍정 92.8% · 리뷰 97 · 기타</div>
+          <div class="chips"><span class="chip">튼튼하다</span> <span class="chip">깔끔하다</span> <span class="chip">배송</span> <span class="chip">만족</span></div></div><div class="promo consider">
+          <div class="promo-head"><span class="badge consider">△ 추진 검토</span>
+            <span class="pname">스틸 2단 행거 4종</span></div>
+          <div class="promo-meta">★4.74 · 긍정 92.4% · 리뷰 92 · 수납/정리</div>
+          <div class="chips"><span class="chip">튼튼하다</span> <span class="chip">만족</span> <span class="chip">배송</span> <span class="chip">깔끔하다</span></div></div><div class="promo consider">
+          <div class="promo-head"><span class="badge consider">△ 추진 검토</span>
+            <span class="pname">초미니 빈티지 키링캠</span></div>
+          <div class="promo-meta">★4.74 · 긍정 94.5% · 리뷰 73 · 기타</div>
+          <div class="chips"><span class="chip">만족</span> <span class="chip">예쁘다</span> <span class="chip">편하다</span> <span class="chip">배송</span></div></div><div class="promo consider">
+          <div class="promo-head"><span class="badge consider">△ 추진 검토</span>
+            <span class="pname">LED 송풍 화장품 정리함</span></div>
+          <div class="promo-meta">★4.74 · 긍정 94.3% · 리뷰 53 · 수납/정리</div>
+          <div class="chips"><span class="chip">예쁘다</span> <span class="chip">만족</span> <span class="chip">깔끔하다</span> <span class="chip">편하다</span></div></div><div class="promo consider">
+          <div class="promo-head"><span class="badge consider">△ 추진 검토</span>
+            <span class="pname">베리베리 호텔수건</span></div>
+          <div class="promo-meta">★4.74 · 긍정 90.0% · 리뷰 50 · 욕실/화장실</div>
+          <div class="chips"><span class="chip">예쁘다</span> <span class="chip">만족</span> <span class="chip">배송</span> <span class="chip">부드럽다</span></div></div><div class="promo consider">
+          <div class="promo-head"><span class="badge consider">△ 추진 검토</span>
+            <span class="pname">더슬림 음식물 처리기 4L</span></div>
+          <div class="promo-meta">★4.74 · 긍정 91.5% · 리뷰 47 · 기타</div>
+          <div class="chips"><span class="chip">만족</span> <span class="chip">배송</span> <span class="chip">편하다</span> <span class="chip">조용하다</span></div></div><div class="promo consider">
+          <div class="promo-head"><span class="badge consider">△ 추진 검토</span>
+            <span class="pname">[단종]까꿍 동물 바디필로우</span></div>
+          <div class="promo-meta">★4.74 · 긍정 95.3% · 리뷰 43 · 침구/매트리스</div>
+          <div class="chips"><span class="chip">만족</span> <span class="chip">배송</span> <span class="chip">튼튼하다</span> <span class="chip">예쁘다</span></div></div><div class="promo consider">
+          <div class="promo-head"><span class="badge consider">△ 추진 검토</span>
+            <span class="pname">자동회전 롤팬 플러스</span></div>
+          <div class="promo-meta">★4.74 · 긍정 92.3% · 리뷰 39 · 기타</div>
+          <div class="chips"><span class="chip">편하다</span> <span class="chip">배송</span> <span class="chip">만족</span> <span class="chip">예쁘다</span></div></div><div class="promo consider">
+          <div class="promo-head"><span class="badge consider">△ 추진 검토</span>
+            <span class="pname">반반 매트리스 토퍼 10cm</span></div>
+          <div class="promo-meta">★4.73 · 긍정 93.8% · 리뷰 1,705 · 침구/매트리스</div>
+          <div class="chips"><span class="chip">따뜻하다</span> <span class="chip">만족</span> <span class="chip">배송</span> <span class="chip">저렴/가성비</span></div></div><div class="promo consider">
+          <div class="promo-head"><span class="badge consider">△ 추진 검토</span>
+            <span class="pname">드마망 규조토 발매트</span></div>
+          <div class="promo-meta">★4.73 · 긍정 90.0% · 리뷰 490 · 욕실/화장실</div>
+          <div class="chips"><span class="chip">예쁘다</span> <span class="chip">만족</span> <span class="chip">배송</span> <span class="chip">깔끔하다</span></div></div><div class="promo consider">
+          <div class="promo-head"><span class="badge consider">△ 추진 검토</span>
+            <span class="pname">원룸만들기 사계절 파자마</span></div>
+          <div class="promo-meta">★4.73 · 긍정 93.5% · 리뷰 186 · 기타</div>
+          <div class="chips"><span class="chip">만족</span> <span class="chip">편하다</span> <span class="chip">예쁘다</span> <span class="chip">넉넉하다</span></div></div><div class="promo consider">
+          <div class="promo-head"><span class="badge consider">△ 추진 검토</span>
+            <span class="pname">누보 무헤드 빅서랍침대</span></div>
+          <div class="promo-meta">★4.73 · 긍정 92.6% · 리뷰 162 · 수납/정리</div>
+          <div class="chips"><span class="chip">배송</span> <span class="chip">만족</span> <span class="chip">튼튼하다</span> <span class="chip">예쁘다</span></div></div><div class="promo consider">
+          <div class="promo-head"><span class="badge consider">△ 추진 검토</span>
+            <span class="pname">새지않는 보온보냉 텀블러</span></div>
+          <div class="promo-meta">★4.73 · 긍정 93.5% · 리뷰 93 · 주방/식기</div>
+          <div class="chips"><span class="chip">만족</span> <span class="chip">예쁘다</span> <span class="chip">편하다</span> <span class="chip">배송</span></div></div><div class="promo consider">
+          <div class="promo-head"><span class="badge consider">△ 추진 검토</span>
+            <span class="pname">높이조절 핸드폰 거치대</span></div>
+          <div class="promo-meta">★4.73 · 긍정 90.2% · 리뷰 92 · 수납/정리</div>
+          <div class="chips"><span class="chip">편하다</span> <span class="chip">만족</span> <span class="chip">튼튼하다</span> <span class="chip">배송</span></div></div><div class="promo consider">
+          <div class="promo-head"><span class="badge consider">△ 추진 검토</span>
+            <span class="pname">현관 마스크 홀더</span></div>
+          <div class="promo-meta">★4.73 · 긍정 91.4% · 리뷰 81 · 기타</div>
+          <div class="chips"><span class="chip">편하다</span> <span class="chip">만족</span> <span class="chip">배송</span> <span class="chip">예쁘다</span></div></div><div class="promo consider">
+          <div class="promo-head"><span class="badge consider">△ 추진 검토</span>
+            <span class="pname">원룸용 냉장고 모음</span></div>
+          <div class="promo-meta">★4.73 · 긍정 93.2% · 리뷰 73 · 기타</div>
+          <div class="chips"><span class="chip">배송</span> <span class="chip">깔끔하다</span> <span class="chip">저렴/가성비</span> <span class="chip">만족</span></div></div><div class="promo consider">
+          <div class="promo-head"><span class="badge consider">△ 추진 검토</span>
+            <span class="pname">추가_인절미 베개커버</span></div>
+          <div class="promo-meta">★4.73 · 긍정 93.9% · 리뷰 66 · 침구/매트리스</div>
+          <div class="chips"><span class="chip">만족</span> <span class="chip">따뜻하다</span> <span class="chip">배송</span> <span class="chip">부드럽다</span></div></div><div class="promo consider">
+          <div class="promo-head"><span class="badge consider">△ 추진 검토</span>
+            <span class="pname">[단종]상어 슬리퍼</span></div>
+          <div class="promo-meta">★4.73 · 긍정 91.9% · 리뷰 62 · 기타</div>
+          <div class="chips"><span class="chip">예쁘다</span> <span class="chip">편하다</span> <span class="chip">배송</span> <span class="chip">만족</span></div></div><div class="promo consider">
+          <div class="promo-head"><span class="badge consider">△ 추진 검토</span>
+            <span class="pname">쿠잉 스탠드 냉동고 2종</span></div>
+          <div class="promo-meta">★4.73 · 긍정 93.3% · 리뷰 60 · 생활가전</div>
+          <div class="chips"><span class="chip">만족</span> <span class="chip">배송</span> <span class="chip">넉넉하다</span> <span class="chip">저렴/가성비</span></div></div><div class="promo consider">
+          <div class="promo-head"><span class="badge consider">△ 추진 검토</span>
+            <span class="pname">북유럽 코너 장스탠드</span></div>
+          <div class="promo-meta">★4.73 · 긍정 93.8% · 리뷰 48 · 생활가전</div>
+          <div class="chips"><span class="chip">만족</span> <span class="chip">예쁘다</span> <span class="chip">편하다</span> <span class="chip">배송</span></div></div><div class="promo consider">
+          <div class="promo-head"><span class="badge consider">△ 추진 검토</span>
+            <span class="pname">고속 무선 충전 무드등</span></div>
+          <div class="promo-meta">★4.73 · 긍정 95.5% · 리뷰 44 · 생활가전</div>
+          <div class="chips"><span class="chip">예쁘다</span> <span class="chip">만족</span> <span class="chip">깔끔하다</span> <span class="chip">편하다</span></div></div><div class="promo consider">
+          <div class="promo-head"><span class="badge consider">△ 추진 검토</span>
+            <span class="pname">추가_HA-13KW</span></div>
+          <div class="promo-meta">★4.73 · 긍정 93.3% · 리뷰 30 · 기타</div>
+          <div class="chips"><span class="chip">만족</span> <span class="chip">가볍다</span> <span class="chip">저렴/가성비</span> <span class="chip">배송</span></div></div><div class="promo consider">
+          <div class="promo-head"><span class="badge consider">△ 추진 검토</span>
+            <span class="pname">못없이 설치하는 브라켓</span></div>
+          <div class="promo-meta">★4.72 · 긍정 91.7% · 리뷰 1,332 · 기타</div>
+          <div class="chips"><span class="chip">튼튼하다</span> <span class="chip">편하다</span> <span class="chip">만족</span> <span class="chip">설치쉬움</span></div></div><div class="promo consider">
+          <div class="promo-head"><span class="badge consider">△ 추진 검토</span>
+            <span class="pname">더커진 냉각 손선풍기</span></div>
+          <div class="promo-meta">★4.72 · 긍정 92.2% · 리뷰 892 · 계절가전</div>
+          <div class="chips"><span class="chip">만족</span> <span class="chip">시원하다</span> <span class="chip">배송</span> <span class="chip">넉넉하다</span></div></div><div class="promo consider">
+          <div class="promo-head"><span class="badge consider">△ 추진 검토</span>
+            <span class="pname">키토우 강력 보풀 제거기</span></div>
+          <div class="promo-meta">★4.72 · 긍정 93.8% · 리뷰 274 · 기타</div>
+          <div class="chips"><span class="chip">만족</span> <span class="chip">예쁘다</span> <span class="chip">편하다</span> <span class="chip">깔끔하다</span></div></div><div class="promo consider">
+          <div class="promo-head"><span class="badge consider">△ 추진 검토</span>
+            <span class="pname">이동식 베드 테이블 3종</span></div>
+          <div class="promo-meta">★4.72 · 긍정 91.6% · 리뷰 155 · 기타</div>
+          <div class="chips"><span class="chip">편하다</span> <span class="chip">튼튼하다</span> <span class="chip">만족</span> <span class="chip">배송</span></div></div><div class="promo consider">
+          <div class="promo-head"><span class="badge consider">△ 추진 검토</span>
+            <span class="pname">추가_쿨슬리브 베개커버</span></div>
+          <div class="promo-meta">★4.72 · 긍정 93.5% · 리뷰 124 · 침구/매트리스</div>
+          <div class="chips"><span class="chip">시원하다</span> <span class="chip">만족</span> <span class="chip">편하다</span> <span class="chip">부드럽다</span></div></div><div class="promo consider">
+          <div class="promo-head"><span class="badge consider">△ 추진 검토</span>
+            <span class="pname">백문백답 모음</span></div>
+          <div class="promo-meta">★4.72 · 긍정 93.0% · 리뷰 100 · 기타</div>
+          <div class="chips"><span class="chip">배송</span> <span class="chip">만족</span> <span class="chip">예쁘다</span> <span class="chip">저렴/가성비</span></div></div><div class="promo consider">
+          <div class="promo-head"><span class="badge consider">△ 추진 검토</span>
+            <span class="pname">60수 고밀도 차렵 침구</span></div>
+          <div class="promo-meta">★4.72 · 긍정 93.1% · 리뷰 72 · 침구/매트리스</div>
+          <div class="chips"><span class="chip">따뜻하다</span> <span class="chip">만족</span> <span class="chip">예쁘다</span> <span class="chip">배송</span></div></div><div class="promo consider">
+          <div class="promo-head"><span class="badge consider">△ 추진 검토</span>
+            <span class="pname">시그니처 10cm 매트토퍼</span></div>
+          <div class="promo-meta">★4.72 · 긍정 93.0% · 리뷰 57 · 침구/매트리스</div>
+          <div class="chips"><span class="chip">만족</span> <span class="chip">따뜻하다</span> <span class="chip">배송</span> <span class="chip">편하다</span></div></div><div class="promo consider">
+          <div class="promo-head"><span class="badge consider">△ 추진 검토</span>
+            <span class="pname">물빠짐 후르츠팟</span></div>
+          <div class="promo-meta">★4.72 · 긍정 94.4% · 리뷰 54 · 기타</div>
+          <div class="chips"><span class="chip">만족</span> <span class="chip">저렴/가성비</span> <span class="chip">편하다</span> <span class="chip">예쁘다</span></div></div><div class="promo consider">
+          <div class="promo-head"><span class="badge consider">△ 추진 검토</span>
+            <span class="pname">워셔블 데일리 단모 러그</span></div>
+          <div class="promo-meta">★4.72 · 긍정 93.5% · 리뷰 46 · 인테리어/소품</div>
+          <div class="chips"><span class="chip">예쁘다</span> <span class="chip">저렴/가성비</span> <span class="chip">만족</span> <span class="chip">부드럽다</span></div></div><div class="promo consider">
+          <div class="promo-head"><span class="badge consider">△ 추진 검토</span>
+            <span class="pname">LED 커튼전구 줄조명 3M</span></div>
+          <div class="promo-meta">★4.72 · 긍정 90.7% · 리뷰 43 · 생활가전</div>
+          <div class="chips"><span class="chip">예쁘다</span> <span class="chip">만족</span> <span class="chip">저렴/가성비</span> <span class="chip">편하다</span></div></div><div class="promo consider">
+          <div class="promo-head"><span class="badge consider">△ 추진 검토</span>
+            <span class="pname">윈코 전동 드라이버</span></div>
+          <div class="promo-meta">★4.72 · 긍정 92.5% · 리뷰 40 · 기타</div>
+          <div class="chips"><span class="chip">예쁘다</span> <span class="chip">만족</span> <span class="chip">편하다</span> <span class="chip">가볍다</span></div></div><div class="promo consider">
+          <div class="promo-head"><span class="badge consider">△ 추진 검토</span>
+            <span class="pname">예열없는 듀얼모터 온풍기</span></div>
+          <div class="promo-meta">★4.72 · 긍정 94.4% · 리뷰 36 · 계절가전</div>
+          <div class="chips"><span class="chip">따뜻하다</span> <span class="chip">만족</span> <span class="chip">저렴/가성비</span> <span class="chip">예쁘다</span></div></div><div class="promo consider">
+          <div class="promo-head"><span class="badge consider">△ 추진 검토</span>
+            <span class="pname">330W 흡입력 괴물 청소기</span></div>
+          <div class="promo-meta">★4.71 · 긍정 92.4% · 리뷰 2,802 · 청소/세탁</div>
+          <div class="chips"><span class="chip">만족</span> <span class="chip">가볍다</span> <span class="chip">저렴/가성비</span> <span class="chip">편하다</span></div></div><div class="promo consider">
+          <div class="promo-head"><span class="badge consider">△ 추진 검토</span>
+            <span class="pname">더 폭신 듀라픽셀 쿨패드</span></div>
+          <div class="promo-meta">★4.71 · 긍정 91.6% · 리뷰 683 · 침구/매트리스</div>
+          <div class="chips"><span class="chip">시원하다</span> <span class="chip">만족</span> <span class="chip">배송</span> <span class="chip">부드럽다</span></div></div><div class="promo consider">
+          <div class="promo-head"><span class="badge consider">△ 추진 검토</span>
+            <span class="pname">부착식 LED 센서바 모음</span></div>
+          <div class="promo-meta">★4.71 · 긍정 93.0% · 리뷰 444 · 기타</div>
+          <div class="chips"><span class="chip">만족</span> <span class="chip">편하다</span> <span class="chip">배송</span> <span class="chip">저렴/가성비</span></div></div><div class="promo consider">
+          <div class="promo-head"><span class="badge consider">△ 추진 검토</span>
+            <span class="pname">추가_클린스테이션 추가상품</span></div>
+          <div class="promo-meta">★4.71 · 긍정 91.2% · 리뷰 433 · 기타</div>
+          <div class="chips"><span class="chip">만족</span> <span class="chip">가볍다</span> <span class="chip">편하다</span> <span class="chip">저렴/가성비</span></div></div><div class="promo consider">
+          <div class="promo-head"><span class="badge consider">△ 추진 검토</span>
+            <span class="pname">스트라이프 탄소매트 커버</span></div>
+          <div class="promo-meta">★4.71 · 긍정 91.5% · 리뷰 129 · 침구/매트리스</div>
+          <div class="chips"><span class="chip">만족</span> <span class="chip">예쁘다</span> <span class="chip">편하다</span> <span class="chip">따뜻하다</span></div></div><div class="promo consider">
+          <div class="promo-head"><span class="badge consider">△ 추진 검토</span>
+            <span class="pname">냄새차단 자동센서 휴지통</span></div>
+          <div class="promo-meta">★4.71 · 긍정 94.4% · 리뷰 126 · 주방/식기</div>
+          <div class="chips"><span class="chip">편하다</span> <span class="chip">만족</span> <span class="chip">예쁘다</span> <span class="chip">깔끔하다</span></div></div><div class="promo consider">
+          <div class="promo-head"><span class="badge consider">△ 추진 검토</span>
+            <span class="pname">미니 물빠짐 식기건조대</span></div>
+          <div class="promo-meta">★4.71 · 긍정 93.2% · 리뷰 118 · 청소/세탁</div>
+          <div class="chips"><span class="chip">만족</span> <span class="chip">튼튼하다</span> <span class="chip">편하다</span> <span class="chip">깔끔하다</span></div></div><div class="promo consider">
+          <div class="promo-head"><span class="badge consider">△ 추진 검토</span>
+            <span class="pname">오싹아이스 냉감 여름이불</span></div>
+          <div class="promo-meta">★4.71 · 긍정 94.1% · 리뷰 85 · 침구/매트리스</div>
+          <div class="chips"><span class="chip">시원하다</span> <span class="chip">만족</span> <span class="chip">가볍다</span> <span class="chip">편하다</span></div></div><div class="promo consider">
+          <div class="promo-head"><span class="badge consider">△ 추진 검토</span>
+            <span class="pname">파인포스 무선 청소기</span></div>
+          <div class="promo-meta">★4.71 · 긍정 92.2% · 리뷰 77 · 청소/세탁</div>
+          <div class="chips"><span class="chip">가볍다</span> <span class="chip">만족</span> <span class="chip">저렴/가성비</span> <span class="chip">편하다</span></div></div><div class="promo consider">
+          <div class="promo-head"><span class="badge consider">△ 추진 검토</span>
+            <span class="pname">추가_디얼카메라 추가상품</span></div>
+          <div class="promo-meta">★4.71 · 긍정 92.8% · 리뷰 69 · 기타</div>
+          <div class="chips"><span class="chip">만족</span> <span class="chip">예쁘다</span> <span class="chip">배송</span> <span class="chip">저렴/가성비</span></div></div><div class="promo consider">
+          <div class="promo-head"><span class="badge consider">△ 추진 검토</span>
+            <span class="pname">진공 음식물 쓰레기통 3종</span></div>
+          <div class="promo-meta">★4.71 · 긍정 96.8% · 리뷰 63 · 주방/식기</div>
+          <div class="chips"><span class="chip">만족</span> <span class="chip">예쁘다</span> <span class="chip">편하다</span> <span class="chip">깔끔하다</span></div></div><div class="promo consider">
+          <div class="promo-head"><span class="badge consider">△ 추진 검토</span>
+            <span class="pname">곰돌이 러그</span></div>
+          <div class="promo-meta">★4.71 · 긍정 94.6% · 리뷰 56 · 인테리어/소품</div>
+          <div class="chips"><span class="chip">예쁘다</span> <span class="chip">부드럽다</span> <span class="chip">만족</span> <span class="chip">배송</span></div></div><div class="promo consider">
+          <div class="promo-head"><span class="badge consider">△ 추진 검토</span>
+            <span class="pname">쿠잉 PTC 미니건조기</span></div>
+          <div class="promo-meta">★4.71 · 긍정 94.5% · 리뷰 55 · 청소/세탁</div>
+          <div class="chips"><span class="chip">만족</span> <span class="chip">편하다</span> <span class="chip">예쁘다</span> <span class="chip">가볍다</span></div></div><div class="promo consider">
+          <div class="promo-head"><span class="badge consider">△ 추진 검토</span>
+            <span class="pname">진공스텐 음식물쓰레기통</span></div>
+          <div class="promo-meta">★4.71 · 긍정 92.2% · 리뷰 51 · 주방/식기</div>
+          <div class="chips"><span class="chip">만족</span> <span class="chip">배송</span> <span class="chip">깔끔하다</span> <span class="chip">예쁘다</span></div></div><div class="promo consider">
+          <div class="promo-head"><span class="badge consider">△ 추진 검토</span>
+            <span class="pname">30초 미니 스팀다리미</span></div>
+          <div class="promo-meta">★4.71 · 긍정 95.6% · 리뷰 45 · 기타</div>
+          <div class="chips"><span class="chip">편하다</span> <span class="chip">배송</span> <span class="chip">만족</span> <span class="chip">가볍다</span></div></div><div class="promo consider">
+          <div class="promo-head"><span class="badge consider">△ 추진 검토</span>
+            <span class="pname">[단종]굿나잇 진동 침구청소기</span></div>
+          <div class="promo-meta">★4.71 · 긍정 95.1% · 리뷰 41 · 침구/매트리스</div>
+          <div class="chips"><span class="chip">만족</span> <span class="chip">편하다</span> <span class="chip">깔끔하다</span> <span class="chip">가볍다</span></div></div><div class="promo consider">
+          <div class="promo-head"><span class="badge consider">△ 추진 검토</span>
+            <span class="pname">강아지 실내화 2종</span></div>
+          <div class="promo-meta">★4.71 · 긍정 92.1% · 리뷰 38 · 기타</div>
+          <div class="chips"><span class="chip">따뜻하다</span> <span class="chip">예쁘다</span> <span class="chip">만족</span> <span class="chip">편하다</span></div></div><div class="promo consider">
+          <div class="promo-head"><span class="badge consider">△ 추진 검토</span>
+            <span class="pname">곰표한일 앱연동 탄소매트</span></div>
+          <div class="promo-meta">★4.71 · 긍정 91.2% · 리뷰 34 · 인테리어/소품</div>
+          <div class="chips"><span class="chip">만족</span> <span class="chip">따뜻하다</span> <span class="chip">편하다</span> <span class="chip">배송</span></div></div><div class="promo consider">
+          <div class="promo-head"><span class="badge consider">△ 추진 검토</span>
+            <span class="pname">전자파 안심 전기요</span></div>
+          <div class="promo-meta">★4.70 · 긍정 92.6% · 리뷰 487 · 계절가전</div>
+          <div class="chips"><span class="chip">따뜻하다</span> <span class="chip">만족</span> <span class="chip">배송</span> <span class="chip">저렴/가성비</span></div></div><div class="promo consider">
+          <div class="promo-head"><span class="badge consider">△ 추진 검토</span>
+            <span class="pname">무아스 LED 시계 모음</span></div>
+          <div class="promo-meta">★4.70 · 긍정 90.8% · 리뷰 281 · 인테리어/소품</div>
+          <div class="chips"><span class="chip">예쁘다</span> <span class="chip">만족</span> <span class="chip">깔끔하다</span> <span class="chip">편하다</span></div></div><div class="promo consider">
+          <div class="promo-head"><span class="badge consider">△ 추진 검토</span>
+            <span class="pname">조립식 투명 회전 책장</span></div>
+          <div class="promo-meta">★4.70 · 긍정 92.4% · 리뷰 262 · 기타</div>
+          <div class="chips"><span class="chip">만족</span> <span class="chip">튼튼하다</span> <span class="chip">예쁘다</span> <span class="chip">깔끔하다</span></div></div><div class="promo consider">
+          <div class="promo-head"><span class="badge consider">△ 추진 검토</span>
+            <span class="pname">디얼 초미니 키링캠</span></div>
+          <div class="promo-meta">★4.70 · 긍정 92.7% · 리뷰 218 · 기타</div>
+          <div class="chips"><span class="chip">만족</span> <span class="chip">배송</span> <span class="chip">편하다</span> <span class="chip">예쁘다</span></div></div><div class="promo consider">
+          <div class="promo-head"><span class="badge consider">△ 추진 검토</span>
+            <span class="pname">IoT 미라클모닝 알람시계</span></div>
+          <div class="promo-meta">★4.70 · 긍정 93.1% · 리뷰 202 · 인테리어/소품</div>
+          <div class="chips"><span class="chip">만족</span> <span class="chip">편하다</span> <span class="chip">예쁘다</span> <span class="chip">배송</span></div></div><div class="promo consider">
+          <div class="promo-head"><span class="badge consider">△ 추진 검토</span>
+            <span class="pname">땀 안 차는 고무장갑 3P</span></div>
+          <div class="promo-meta">★4.70 · 긍정 92.6% · 리뷰 135 · 기타</div>
+          <div class="chips"><span class="chip">만족</span> <span class="chip">편하다</span> <span class="chip">배송</span> <span class="chip">튼튼하다</span></div></div><div class="promo consider">
+          <div class="promo-head"><span class="badge consider">△ 추진 검토</span>
+            <span class="pname">라쿠진 무선 진공 청소기</span></div>
+          <div class="promo-meta">★4.70 · 긍정 92.0% · 리뷰 113 · 청소/세탁</div>
+          <div class="chips"><span class="chip">가볍다</span> <span class="chip">저렴/가성비</span> <span class="chip">편하다</span> <span class="chip">만족</span></div></div><div class="promo consider">
+          <div class="promo-head"><span class="badge consider">△ 추진 검토</span>
+            <span class="pname">커튼 부자재 모음</span></div>
+          <div class="promo-meta">★4.70 · 긍정 91.9% · 리뷰 74 · 인테리어/소품</div>
+          <div class="chips"><span class="chip">만족</span> <span class="chip">편하다</span> <span class="chip">튼튼하다</span> <span class="chip">깔끔하다</span></div></div><div class="promo consider">
+          <div class="promo-head"><span class="badge consider">△ 추진 검토</span>
+            <span class="pname">고용량 큐브 멀티탭</span></div>
+          <div class="promo-meta">★4.70 · 긍정 93.8% · 리뷰 64 · 생활가전</div>
+          <div class="chips"><span class="chip">예쁘다</span> <span class="chip">만족</span> <span class="chip">편하다</span> <span class="chip">배송</span></div></div><div class="promo consider">
+          <div class="promo-head"><span class="badge consider">△ 추진 검토</span>
+            <span class="pname">마틴 다용도 주방선반</span></div>
+          <div class="promo-meta">★4.70 · 긍정 91.7% · 리뷰 60 · 주방/식기</div>
+          <div class="chips"><span class="chip">예쁘다</span> <span class="chip">튼튼하다</span> <span class="chip">만족</span> <span class="chip">배송</span></div></div><div class="promo consider">
+          <div class="promo-head"><span class="badge consider">△ 추진 검토</span>
+            <span class="pname">먼지 없는 사계절 러그</span></div>
+          <div class="promo-meta">★4.70 · 긍정 92.5% · 리뷰 53 · 청소/세탁</div>
+          <div class="chips"><span class="chip">예쁘다</span> <span class="chip">만족</span> <span class="chip">깔끔하다</span> <span class="chip">저렴/가성비</span></div></div><div class="promo consider">
+          <div class="promo-head"><span class="badge consider">△ 추진 검토</span>
+            <span class="pname">송월 30수 모나코 수건</span></div>
+          <div class="promo-meta">★4.70 · 긍정 93.5% · 리뷰 46 · 욕실/화장실</div>
+          <div class="chips"><span class="chip">만족</span> <span class="chip">편하다</span> <span class="chip">저렴/가성비</span> <span class="chip">부드럽다</span></div></div><div class="promo consider">
+          <div class="promo-head"><span class="badge consider">△ 추진 검토</span>
+            <span class="pname">혼요 멀티쿠커</span></div>
+          <div class="promo-meta">★4.70 · 긍정 90.7% · 리뷰 43 · 기타</div>
+          <div class="chips"><span class="chip">만족</span> <span class="chip">편하다</span> <span class="chip">예쁘다</span> <span class="chip">배송</span></div></div><div class="promo consider">
+          <div class="promo-head"><span class="badge consider">△ 추진 검토</span>
+            <span class="pname">오아 음파 전동 칫솔</span></div>
+          <div class="promo-meta">★4.70 · 긍정 90.0% · 리뷰 40 · 욕실/화장실</div>
+          <div class="chips"><span class="chip">편하다</span> <span class="chip">만족</span> <span class="chip">예쁘다</span> <span class="chip">시원하다</span></div></div><div class="promo consider">
+          <div class="promo-head"><span class="badge consider">△ 추진 검토</span>
+            <span class="pname">올리 센서 휴지통 1+1</span></div>
+          <div class="promo-meta">★4.70 · 긍정 91.9% · 리뷰 37 · 주방/식기</div>
+          <div class="chips"><span class="chip">만족</span> <span class="chip">편하다</span> <span class="chip">저렴/가성비</span> <span class="chip">예쁘다</span></div></div><div class="promo consider">
+          <div class="promo-head"><span class="badge consider">△ 추진 검토</span>
+            <span class="pname">오래가는 자동 변기세정제</span></div>
+          <div class="promo-meta">★4.70 · 긍정 90.0% · 리뷰 30 · 욕실/화장실</div>
+          <div class="chips"><span class="chip">만족</span> <span class="chip">편하다</span> <span class="chip">깔끔하다</span> <span class="chip">시원하다</span></div></div><div class="promo consider">
+          <div class="promo-head"><span class="badge consider">△ 추진 검토</span>
+            <span class="pname">셀카모드 초미니 키링캠</span></div>
+          <div class="promo-meta">★4.69 · 긍정 92.2% · 리뷰 706 · 기타</div>
+          <div class="chips"><span class="chip">만족</span> <span class="chip">예쁘다</span> <span class="chip">배송</span> <span class="chip">가볍다</span></div></div><div class="promo consider">
+          <div class="promo-head"><span class="badge consider">△ 추진 검토</span>
+            <span class="pname">코튼랩 세면 호텔수건</span></div>
+          <div class="promo-meta">★4.69 · 긍정 90.1% · 리뷰 273 · 욕실/화장실</div>
+          <div class="chips"><span class="chip">만족</span> <span class="chip">예쁘다</span> <span class="chip">배송</span> <span class="chip">저렴/가성비</span></div></div><div class="promo consider">
+          <div class="promo-head"><span class="badge consider">△ 추진 검토</span>
+            <span class="pname">별도_와이드롤클리너 추가</span></div>
+          <div class="promo-meta">★4.69 · 긍정 91.7% · 리뷰 217 · 기타</div>
+          <div class="chips"><span class="chip">만족</span> <span class="chip">편하다</span> <span class="chip">넉넉하다</span> <span class="chip">배송</span></div></div><div class="promo consider">
+          <div class="promo-head"><span class="badge consider">△ 추진 검토</span>
+            <span class="pname">방콕 집순이 후드담요</span></div>
+          <div class="promo-meta">★4.69 · 긍정 92.7% · 리뷰 164 · 침구/매트리스</div>
+          <div class="chips"><span class="chip">따뜻하다</span> <span class="chip">만족</span> <span class="chip">편하다</span> <span class="chip">예쁘다</span></div></div><div class="promo consider">
+          <div class="promo-head"><span class="badge consider">△ 추진 검토</span>
+            <span class="pname">법랑 사각 핸들 냄비</span></div>
+          <div class="promo-meta">★4.69 · 긍정 90.1% · 리뷰 91 · 주방/식기</div>
+          <div class="chips"><span class="chip">예쁘다</span> <span class="chip">만족</span> <span class="chip">편하다</span> <span class="chip">배송</span></div></div><div class="promo consider">
+          <div class="promo-head"><span class="badge consider">△ 추진 검토</span>
+            <span class="pname">치유 미술 그림일기장</span></div>
+          <div class="promo-meta">★4.69 · 긍정 92.7% · 리뷰 55 · 기타</div>
+          <div class="chips"><span class="chip">배송</span> <span class="chip">깔끔하다</span> <span class="chip">만족</span> <span class="chip">편하다</span></div></div><div class="promo consider">
+          <div class="promo-head"><span class="badge consider">△ 추진 검토</span>
+            <span class="pname">맹구 콧물 시계</span></div>
+          <div class="promo-meta">★4.69 · 긍정 94.4% · 리뷰 36 · 인테리어/소품</div>
+          <div class="chips"><span class="chip">만족</span> <span class="chip">예쁘다</span> <span class="chip">배송</span> <span class="chip">조용하다</span></div></div><div class="promo consider">
+          <div class="promo-head"><span class="badge consider">△ 추진 검토</span>
+            <span class="pname">진공 음식물 쓰레기통</span></div>
+          <div class="promo-meta">★4.68 · 긍정 92.6% · 리뷰 929 · 주방/식기</div>
+          <div class="chips"><span class="chip">예쁘다</span> <span class="chip">만족</span> <span class="chip">깔끔하다</span> <span class="chip">편하다</span></div></div><div class="promo consider">
+          <div class="promo-head"><span class="badge consider">△ 추진 검토</span>
+            <span class="pname">써머쿨링 냉감 여름이불</span></div>
+          <div class="promo-meta">★4.68 · 긍정 91.1% · 리뷰 497 · 침구/매트리스</div>
+          <div class="chips"><span class="chip">시원하다</span> <span class="chip">만족</span> <span class="chip">예쁘다</span> <span class="chip">배송</span></div></div><div class="promo consider">
+          <div class="promo-head"><span class="badge consider">△ 추진 검토</span>
+            <span class="pname">슬립베이커리 식빵토퍼</span></div>
+          <div class="promo-meta">★4.68 · 긍정 91.8% · 리뷰 170 · 침구/매트리스</div>
+          <div class="chips"><span class="chip">만족</span> <span class="chip">편하다</span> <span class="chip">배송</span> <span class="chip">예쁘다</span></div></div><div class="promo consider">
+          <div class="promo-head"><span class="badge consider">△ 추진 검토</span>
+            <span class="pname">3단 접이식 매트리스</span></div>
+          <div class="promo-meta">★4.68 · 긍정 91.3% · 리뷰 138 · 침구/매트리스</div>
+          <div class="chips"><span class="chip">만족</span> <span class="chip">저렴/가성비</span> <span class="chip">편하다</span> <span class="chip">배송</span></div></div><div class="promo consider">
+          <div class="promo-head"><span class="badge consider">△ 추진 검토</span>
+            <span class="pname">아차거 냉각 손선풍기</span></div>
+          <div class="promo-meta">★4.68 · 긍정 93.4% · 리뷰 122 · 계절가전</div>
+          <div class="chips"><span class="chip">시원하다</span> <span class="chip">만족</span> <span class="chip">가볍다</span> <span class="chip">편하다</span></div></div><div class="promo consider">
+          <div class="promo-head"><span class="badge consider">△ 추진 검토</span>
+            <span class="pname">강화유리 원룸 전신거울</span></div>
+          <div class="promo-meta">★4.68 · 긍정 91.0% · 리뷰 100 · 인테리어/소품</div>
+          <div class="chips"><span class="chip">튼튼하다</span> <span class="chip">만족</span> <span class="chip">배송</span> <span class="chip">깔끔하다</span></div></div><div class="promo consider">
+          <div class="promo-head"><span class="badge consider">△ 추진 검토</span>
+            <span class="pname">자동 선정리 드라이기</span></div>
+          <div class="promo-meta">★4.68 · 긍정 90.9% · 리뷰 99 · 수납/정리</div>
+          <div class="chips"><span class="chip">편하다</span> <span class="chip">만족</span> <span class="chip">깔끔하다</span> <span class="chip">예쁘다</span></div></div><div class="promo consider">
+          <div class="promo-head"><span class="badge consider">△ 추진 검토</span>
+            <span class="pname">몬스 누빔 방한 커튼</span></div>
+          <div class="promo-meta">★4.68 · 긍정 90.8% · 리뷰 65 · 인테리어/소품</div>
+          <div class="chips"><span class="chip">만족</span> <span class="chip">따뜻하다</span> <span class="chip">배송</span> <span class="chip">편하다</span></div></div><div class="promo consider">
+          <div class="promo-head"><span class="badge consider">△ 추진 검토</span>
+            <span class="pname">캐릭터 미니 가습기 모음</span></div>
+          <div class="promo-meta">★4.68 · 긍정 90.2% · 리뷰 41 · 계절가전</div>
+          <div class="chips"><span class="chip">만족</span> <span class="chip">예쁘다</span> <span class="chip">배송</span> <span class="chip">저렴/가성비</span></div></div><div class="promo consider">
+          <div class="promo-head"><span class="badge consider">△ 추진 검토</span>
+            <span class="pname">투명 선반 트롤리</span></div>
+          <div class="promo-meta">★4.68 · 긍정 90.2% · 리뷰 41 · 수납/정리</div>
+          <div class="chips"><span class="chip">만족</span> <span class="chip">깔끔하다</span> <span class="chip">예쁘다</span> <span class="chip">편하다</span></div></div><div class="promo consider">
+          <div class="promo-head"><span class="badge consider">△ 추진 검토</span>
+            <span class="pname">블랙 냉장고 모음</span></div>
+          <div class="promo-meta">★4.68 · 긍정 90.3% · 리뷰 31 · 기타</div>
+          <div class="chips"><span class="chip">배송</span> <span class="chip">저렴/가성비</span> <span class="chip">예쁘다</span> <span class="chip">만족</span></div></div><div class="promo consider">
+          <div class="promo-head"><span class="badge consider">△ 추진 검토</span>
+            <span class="pname">딥슬립 진동 침구청소기</span></div>
+          <div class="promo-meta">★4.67 · 긍정 91.6% · 리뷰 583 · 침구/매트리스</div>
+          <div class="chips"><span class="chip">만족</span> <span class="chip">편하다</span> <span class="chip">깔끔하다</span> <span class="chip">배송</span></div></div><div class="promo consider">
+          <div class="promo-head"><span class="badge consider">△ 추진 검토</span>
+            <span class="pname">[리퍼]체크 시어서커 토퍼 겸 패드</span></div>
+          <div class="promo-meta">★4.67 · 긍정 92.4% · 리뷰 275 · 침구/매트리스</div>
+          <div class="chips"><span class="chip">시원하다</span> <span class="chip">만족</span> <span class="chip">예쁘다</span> <span class="chip">배송</span></div></div><div class="promo consider">
+          <div class="promo-head"><span class="badge consider">△ 추진 검토</span>
+            <span class="pname">2in1 강력 스팀 다리미</span></div>
+          <div class="promo-meta">★4.67 · 긍정 93.3% · 리뷰 178 · 기타</div>
+          <div class="chips"><span class="chip">편하다</span> <span class="chip">만족</span> <span class="chip">배송</span> <span class="chip">예쁘다</span></div></div><div class="promo consider">
+          <div class="promo-head"><span class="badge consider">△ 추진 검토</span>
+            <span class="pname">웜바디한일 양면 탄소매트</span></div>
+          <div class="promo-meta">★4.67 · 긍정 92.6% · 리뷰 149 · 인테리어/소품</div>
+          <div class="chips"><span class="chip">만족</span> <span class="chip">따뜻하다</span> <span class="chip">배송</span> <span class="chip">편하다</span></div></div><div class="promo consider">
+          <div class="promo-head"><span class="badge consider">△ 추진 검토</span>
+            <span class="pname">[단종]스틸 수납행거 2종</span></div>
+          <div class="promo-meta">★4.67 · 긍정 90.2% · 리뷰 82 · 수납/정리</div>
+          <div class="chips"><span class="chip">튼튼하다</span> <span class="chip">만족</span> <span class="chip">예쁘다</span> <span class="chip">깔끔하다</span></div></div><div class="promo consider">
+          <div class="promo-head"><span class="badge consider">△ 추진 검토</span>
+            <span class="pname">루시드슬립 베개솜 1+1</span></div>
+          <div class="promo-meta">★4.67 · 긍정 91.1% · 리뷰 79 · 침구/매트리스</div>
+          <div class="chips"><span class="chip">만족</span> <span class="chip">편하다</span> <span class="chip">배송</span> <span class="chip">저렴/가성비</span></div></div><div class="promo consider">
+          <div class="promo-head"><span class="badge consider">△ 추진 검토</span>
+            <span class="pname">멜로우 파워윈드 에어건</span></div>
+          <div class="promo-meta">★4.67 · 긍정 91.4% · 리뷰 70 · 기타</div>
+          <div class="chips"><span class="chip">만족</span> <span class="chip">예쁘다</span> <span class="chip">편하다</span> <span class="chip">가볍다</span></div></div><div class="promo consider">
+          <div class="promo-head"><span class="badge consider">△ 추진 검토</span>
+            <span class="pname">오키 접이식 테이블</span></div>
+          <div class="promo-meta">★4.67 · 긍정 91.8% · 리뷰 61 · 기타</div>
+          <div class="chips"><span class="chip">만족</span> <span class="chip">튼튼하다</span> <span class="chip">편하다</span> <span class="chip">배송</span></div></div><div class="promo consider">
+          <div class="promo-head"><span class="badge consider">△ 추진 검토</span>
+            <span class="pname">LED 크리스마스 줄조명</span></div>
+          <div class="promo-meta">★4.67 · 긍정 94.5% · 리뷰 55 · 생활가전</div>
+          <div class="chips"><span class="chip">예쁘다</span> <span class="chip">만족</span> <span class="chip">배송</span> <span class="chip">저렴/가성비</span></div></div><div class="promo consider">
+          <div class="promo-head"><span class="badge consider">△ 추진 검토</span>
+            <span class="pname">수납형 접이식 소파베드</span></div>
+          <div class="promo-meta">★4.67 · 긍정 95.9% · 리뷰 49 · 수납/정리</div>
+          <div class="chips"><span class="chip">배송</span> <span class="chip">만족</span> <span class="chip">편하다</span> <span class="chip">튼튼하다</span></div></div><div class="promo consider">
+          <div class="promo-head"><span class="badge consider">△ 추진 검토</span>
+            <span class="pname">팔레트 패턴 차렵침구</span></div>
+          <div class="promo-meta">★4.67 · 긍정 90.5% · 리뷰 42 · 침구/매트리스</div>
+          <div class="chips"><span class="chip">예쁘다</span> <span class="chip">따뜻하다</span> <span class="chip">만족</span> <span class="chip">부드럽다</span></div></div><div class="promo consider">
+          <div class="promo-head"><span class="badge consider">△ 추진 검토</span>
+            <span class="pname">북극곰 양면 토퍼 13cm</span></div>
+          <div class="promo-meta">★4.66 · 긍정 91.5% · 리뷰 942 · 침구/매트리스</div>
+          <div class="chips"><span class="chip">만족</span> <span class="chip">따뜻하다</span> <span class="chip">배송</span> <span class="chip">부드럽다</span></div></div><div class="promo consider">
+          <div class="promo-head"><span class="badge consider">△ 추진 검토</span>
+            <span class="pname">아이스모찌 쿨링 토퍼패드</span></div>
+          <div class="promo-meta">★4.66 · 긍정 90.3% · 리뷰 380 · 침구/매트리스</div>
+          <div class="chips"><span class="chip">시원하다</span> <span class="chip">만족</span> <span class="chip">배송</span> <span class="chip">부드럽다</span></div></div><div class="promo consider">
+          <div class="promo-head"><span class="badge consider">△ 추진 검토</span>
+            <span class="pname">무타공 자동 도어스토퍼</span></div>
+          <div class="promo-meta">★4.66 · 긍정 93.3% · 리뷰 104 · 침구/매트리스</div>
+          <div class="chips"><span class="chip">편하다</span> <span class="chip">만족</span> <span class="chip">설치쉬움</span> <span class="chip">튼튼하다</span></div></div><div class="promo consider">
+          <div class="promo-head"><span class="badge consider">△ 추진 검토</span>
+            <span class="pname">모리츠 레트로 커피머신</span></div>
+          <div class="promo-meta">★4.66 · 긍정 93.0% · 리뷰 86 · 기타</div>
+          <div class="chips"><span class="chip">예쁘다</span> <span class="chip">저렴/가성비</span> <span class="chip">만족</span> <span class="chip">편하다</span></div></div><div class="promo consider">
+          <div class="promo-head"><span class="badge consider">△ 추진 검토</span>
+            <span class="pname">물세탁 규조토 발매트 1+1</span></div>
+          <div class="promo-meta">★4.66 · 긍정 90.2% · 리뷰 61 · 청소/세탁</div>
+          <div class="chips"><span class="chip">만족</span> <span class="chip">깔끔하다</span> <span class="chip">배송</span> <span class="chip">편하다</span></div></div><div class="promo consider">
+          <div class="promo-head"><span class="badge consider">△ 추진 검토</span>
+            <span class="pname">추가_딥슬립 침구청소기 필터</span></div>
+          <div class="promo-meta">★4.66 · 긍정 92.9% · 리뷰 56 · 침구/매트리스</div>
+          <div class="chips"><span class="chip">만족</span> <span class="chip">배송</span> <span class="chip">편하다</span> <span class="chip">가볍다</span></div></div><div class="promo consider">
+          <div class="promo-head"><span class="badge consider">△ 추진 검토</span>
+            <span class="pname">굽높은 욕실화 3종</span></div>
+          <div class="promo-meta">★4.66 · 긍정 90.6% · 리뷰 53 · 욕실/화장실</div>
+          <div class="chips"><span class="chip">편하다</span> <span class="chip">예쁘다</span> <span class="chip">배송</span> <span class="chip">만족</span></div></div><div class="promo consider">
+          <div class="promo-head"><span class="badge consider">△ 추진 검토</span>
+            <span class="pname">잠이 솔솔 소파 베드</span></div>
+          <div class="promo-meta">★4.66 · 긍정 92.0% · 리뷰 50 · 기타</div>
+          <div class="chips"><span class="chip">만족</span> <span class="chip">편하다</span> <span class="chip">배송</span> <span class="chip">저렴/가성비</span></div></div><div class="promo consider">
+          <div class="promo-head"><span class="badge consider">△ 추진 검토</span>
+            <span class="pname">탈부착 핸들 냄비/팬 세트</span></div>
+          <div class="promo-meta">★4.66 · 긍정 92.7% · 리뷰 41 · 주방/식기</div>
+          <div class="chips"><span class="chip">편하다</span> <span class="chip">예쁘다</span> <span class="chip">만족</span> <span class="chip">저렴/가성비</span></div></div><div class="promo consider">
+          <div class="promo-head"><span class="badge consider">△ 추진 검토</span>
+            <span class="pname">6중롤러 안전 AB슬라이드</span></div>
+          <div class="promo-meta">★4.66 · 긍정 90.6% · 리뷰 32 · 기타</div>
+          <div class="chips"><span class="chip">만족</span> <span class="chip">튼튼하다</span> <span class="chip">편하다</span> <span class="chip">배송</span></div></div><div class="promo consider">
+          <div class="promo-head"><span class="badge consider">△ 추진 검토</span>
+            <span class="pname">내솥분리 멀티 포트</span></div>
+          <div class="promo-meta">★4.65 · 긍정 91.5% · 리뷰 1,191 · 생활가전</div>
+          <div class="chips"><span class="chip">편하다</span> <span class="chip">만족</span> <span class="chip">배송</span> <span class="chip">예쁘다</span></div></div><div class="promo consider">
+          <div class="promo-head"><span class="badge consider">△ 추진 검토</span>
+            <span class="pname">세라믹 조개 무드등</span></div>
+          <div class="promo-meta">★4.65 · 긍정 90.5% · 리뷰 74 · 생활가전</div>
+          <div class="chips"><span class="chip">예쁘다</span> <span class="chip">만족</span> <span class="chip">배송</span> <span class="chip">저렴/가성비</span></div></div><div class="promo consider">
+          <div class="promo-head"><span class="badge consider">△ 추진 검토</span>
+            <span class="pname">저소음 미니 제습기</span></div>
+          <div class="promo-meta">★4.65 · 긍정 90.5% · 리뷰 74 · 계절가전</div>
+          <div class="chips"><span class="chip">만족</span> <span class="chip">예쁘다</span> <span class="chip">편하다</span> <span class="chip">조용하다</span></div></div><div class="promo consider">
+          <div class="promo-head"><span class="badge consider">△ 추진 검토</span>
+            <span class="pname">무타공 도어 스토퍼</span></div>
+          <div class="promo-meta">★4.65 · 긍정 94.2% · 리뷰 52 · 침구/매트리스</div>
+          <div class="chips"><span class="chip">편하다</span> <span class="chip">만족</span> <span class="chip">튼튼하다</span> <span class="chip">설치쉬움</span></div></div><div class="promo consider">
+          <div class="promo-head"><span class="badge consider">△ 추진 검토</span>
+            <span class="pname">몰입의방 핸드폰 잠금장치</span></div>
+          <div class="promo-meta">★4.65 · 긍정 93.9% · 리뷰 49 · 기타</div>
+          <div class="chips"><span class="chip">만족</span> <span class="chip">편하다</span> <span class="chip">저렴/가성비</span> <span class="chip">깔끔하다</span></div></div><div class="promo consider">
+          <div class="promo-head"><span class="badge consider">△ 추진 검토</span>
+            <span class="pname">이지팬 무타공 창문환풍기</span></div>
+          <div class="promo-meta">★4.65 · 긍정 93.5% · 리뷰 46 · 기타</div>
+          <div class="chips"><span class="chip">만족</span> <span class="chip">편하다</span> <span class="chip">배송</span> <span class="chip">저렴/가성비</span></div></div><div class="promo consider">
+          <div class="promo-head"><span class="badge consider">△ 추진 검토</span>
+            <span class="pname">냉장고 서랍 모음</span></div>
+          <div class="promo-meta">★4.65 · 긍정 90.0% · 리뷰 40 · 수납/정리</div>
+          <div class="chips"><span class="chip">깔끔하다</span> <span class="chip">편하다</span> <span class="chip">만족</span> <span class="chip">예쁘다</span></div></div><div class="promo consider">
+          <div class="promo-head"><span class="badge consider">△ 추진 검토</span>
+            <span class="pname">마틴 모듈형 원룸 옷장</span></div>
+          <div class="promo-meta">★4.65 · 긍정 91.2% · 리뷰 34 · 기타</div>
+          <div class="chips"><span class="chip">배송</span> <span class="chip">깔끔하다</span> <span class="chip">예쁘다</span> <span class="chip">만족</span></div></div><div class="promo consider">
+          <div class="promo-head"><span class="badge consider">△ 추진 검토</span>
+            <span class="pname">블루필 넥쿨러 3종</span></div>
+          <div class="promo-meta">★4.65 · 긍정 91.2% · 리뷰 34 · 기타</div>
+          <div class="chips"><span class="chip">시원하다</span> <span class="chip">편하다</span> <span class="chip">만족</span> <span class="chip">배송</span></div></div><div class="promo consider">
+          <div class="promo-head"><span class="badge consider">△ 추진 검토</span>
+            <span class="pname">샤플 헤어스타일러</span></div>
+          <div class="promo-meta">★4.64 · 긍정 92.0% · 리뷰 363 · 기타</div>
+          <div class="chips"><span class="chip">만족</span> <span class="chip">편하다</span> <span class="chip">예쁘다</span> <span class="chip">저렴/가성비</span></div></div><div class="promo consider">
+          <div class="promo-head"><span class="badge consider">△ 추진 검토</span>
+            <span class="pname">부착식 욕실 선반 모음</span></div>
+          <div class="promo-meta">★4.64 · 긍정 91.7% · 리뷰 132 · 수납/정리</div>
+          <div class="chips"><span class="chip">튼튼하다</span> <span class="chip">깔끔하다</span> <span class="chip">만족</span> <span class="chip">편하다</span></div></div><div class="promo consider">
+          <div class="promo-head"><span class="badge consider">△ 추진 검토</span>
+            <span class="pname">룩셈 LED 수납침대</span></div>
+          <div class="promo-meta">★4.64 · 긍정 91.3% · 리뷰 69 · 수납/정리</div>
+          <div class="chips"><span class="chip">만족</span> <span class="chip">예쁘다</span> <span class="chip">배송</span> <span class="chip">편하다</span></div></div><div class="promo consider">
+          <div class="promo-head"><span class="badge consider">△ 추진 검토</span>
+            <span class="pname">[단종]UV살균 진동 침구청소기</span></div>
+          <div class="promo-meta">★4.63 · 긍정 93.5% · 리뷰 124 · 침구/매트리스</div>
+          <div class="chips"><span class="chip">만족</span> <span class="chip">편하다</span> <span class="chip">저렴/가성비</span> <span class="chip">깔끔하다</span></div></div><div class="promo consider">
+          <div class="promo-head"><span class="badge consider">△ 추진 검토</span>
+            <span class="pname">[단종]DIY 명화 그리기</span></div>
+          <div class="promo-meta">★4.63 · 긍정 91.4% · 리뷰 93 · 기타</div>
+          <div class="chips"><span class="chip">만족</span> <span class="chip">예쁘다</span> <span class="chip">배송</span> <span class="chip">편하다</span></div></div><div class="promo consider">
+          <div class="promo-head"><span class="badge consider">△ 추진 검토</span>
+            <span class="pname">슬리퍼 미니 자비츠 2종</span></div>
+          <div class="promo-meta">★4.63 · 긍정 90.2% · 리뷰 41 · 기타</div>
+          <div class="chips"><span class="chip">예쁘다</span> <span class="chip">만족</span> <span class="chip">튼튼하다</span> <span class="chip">배송</span></div></div><div class="promo consider">
+          <div class="promo-head"><span class="badge consider">△ 추진 검토</span>
+            <span class="pname">슬라이딩 철제 받침선반</span></div>
+          <div class="promo-meta">★4.63 · 긍정 90.0% · 리뷰 30 · 수납/정리</div>
+          <div class="chips"><span class="chip">깔끔하다</span> <span class="chip">편하다</span> <span class="chip">만족</span> <span class="chip">예쁘다</span></div></div><div class="promo consider">
+          <div class="promo-head"><span class="badge consider">△ 추진 검토</span>
+            <span class="pname">굿나잇 온열 수면안대</span></div>
+          <div class="promo-meta">★4.63 · 긍정 90.0% · 리뷰 30 · 기타</div>
+          <div class="chips"><span class="chip">만족</span> <span class="chip">따뜻하다</span> <span class="chip">배송</span> <span class="chip">편하다</span></div></div><div class="promo consider">
+          <div class="promo-head"><span class="badge consider">△ 추진 검토</span>
+            <span class="pname">플러피 매트 토퍼 12cm</span></div>
+          <div class="promo-meta">★4.62 · 긍정 91.8% · 리뷰 427 · 침구/매트리스</div>
+          <div class="chips"><span class="chip">만족</span> <span class="chip">배송</span> <span class="chip">편하다</span> <span class="chip">저렴/가성비</span></div></div><div class="promo consider">
+          <div class="promo-head"><span class="badge consider">△ 추진 검토</span>
+            <span class="pname">이어폰 청소스틱</span></div>
+          <div class="promo-meta">★4.62 · 긍정 91.4% · 리뷰 245 · 청소/세탁</div>
+          <div class="chips"><span class="chip">깔끔하다</span> <span class="chip">편하다</span> <span class="chip">만족</span> <span class="chip">배송</span></div></div><div class="promo consider">
+          <div class="promo-head"><span class="badge consider">△ 추진 검토</span>
+            <span class="pname">모아S3200 미니 제습기</span></div>
+          <div class="promo-meta">★4.62 · 긍정 90.6% · 리뷰 138 · 계절가전</div>
+          <div class="chips"><span class="chip">만족</span> <span class="chip">배송</span> <span class="chip">예쁘다</span> <span class="chip">저렴/가성비</span></div></div><div class="promo consider">
+          <div class="promo-head"><span class="badge consider">△ 추진 검토</span>
+            <span class="pname">모듈랙 2단 행거 모음</span></div>
+          <div class="promo-meta">★4.62 · 긍정 91.0% · 리뷰 100 · 수납/정리</div>
+          <div class="chips"><span class="chip">튼튼하다</span> <span class="chip">만족</span> <span class="chip">편하다</span> <span class="chip">저렴/가성비</span></div></div><div class="promo consider">
+          <div class="promo-head"><span class="badge consider">△ 추진 검토</span>
+            <span class="pname">튼튼한 2단 파티션 행거</span></div>
+          <div class="promo-meta">★4.62 · 긍정 90.4% · 리뷰 73 · 수납/정리</div>
+          <div class="chips"><span class="chip">튼튼하다</span> <span class="chip">만족</span> <span class="chip">깔끔하다</span> <span class="chip">편하다</span></div></div><div class="promo consider">
+          <div class="promo-head"><span class="badge consider">△ 추진 검토</span>
+            <span class="pname">윈코 내솥분리 반반쿠커</span></div>
+          <div class="promo-meta">★4.61 · 긍정 91.1% · 리뷰 382 · 기타</div>
+          <div class="chips"><span class="chip">편하다</span> <span class="chip">만족</span> <span class="chip">예쁘다</span> <span class="chip">배송</span></div></div><div class="promo consider">
+          <div class="promo-head"><span class="badge consider">△ 추진 검토</span>
+            <span class="pname">돈뽑는 화분 용돈박스 5종</span></div>
+          <div class="promo-meta">★4.61 · 긍정 90.5% · 리뷰 105 · 수납/정리</div>
+          <div class="chips"><span class="chip">만족</span> <span class="chip">예쁘다</span> <span class="chip">고급스럽다</span> <span class="chip">배송</span></div></div><div class="promo consider">
+          <div class="promo-head"><span class="badge consider">△ 추진 검토</span>
+            <span class="pname">실크터치 냉감 여름침구</span></div>
+          <div class="promo-meta">★4.61 · 긍정 90.8% · 리뷰 87 · 침구/매트리스</div>
+          <div class="chips"><span class="chip">시원하다</span> <span class="chip">만족</span> <span class="chip">예쁘다</span> <span class="chip">편하다</span></div></div><div class="promo consider">
+          <div class="promo-head"><span class="badge consider">△ 추진 검토</span>
+            <span class="pname">이벤트 한약 상자 세트</span></div>
+          <div class="promo-meta">★4.61 · 긍정 90.1% · 리뷰 71 · 기타</div>
+          <div class="chips"><span class="chip">배송</span> <span class="chip">만족</span> <span class="chip">편하다</span> <span class="chip">예쁘다</span></div></div><div class="promo consider">
+          <div class="promo-head"><span class="badge consider">△ 추진 검토</span>
+            <span class="pname">몽글 양털 극세사 이불</span></div>
+          <div class="promo-meta">★4.61 · 긍정 90.3% · 리뷰 62 · 침구/매트리스</div>
+          <div class="chips"><span class="chip">따뜻하다</span> <span class="chip">만족</span> <span class="chip">저렴/가성비</span> <span class="chip">배송</span></div></div><div class="promo consider">
+          <div class="promo-head"><span class="badge consider">△ 추진 검토</span>
+            <span class="pname">밴딩 베개 커버 2종</span></div>
+          <div class="promo-meta">★4.61 · 긍정 90.3% · 리뷰 31 · 침구/매트리스</div>
+          <div class="chips"><span class="chip">편하다</span> <span class="chip">배송</span> <span class="chip">만족</span> <span class="chip">넉넉하다</span></div></div><div class="promo consider">
+          <div class="promo-head"><span class="badge consider">△ 추진 검토</span>
+            <span class="pname">폭신한 듀라론 쿨패드</span></div>
+          <div class="promo-meta">★4.60 · 긍정 90.0% · 리뷰 502 · 침구/매트리스</div>
+          <div class="chips"><span class="chip">시원하다</span> <span class="chip">만족</span> <span class="chip">배송</span> <span class="chip">저렴/가성비</span></div></div><div class="promo consider">
+          <div class="promo-head"><span class="badge consider">△ 추진 검토</span>
+            <span class="pname">냉감 오리 바디필로우</span></div>
+          <div class="promo-meta">★4.60 · 긍정 91.4% · 리뷰 58 · 침구/매트리스</div>
+          <div class="chips"><span class="chip">시원하다</span> <span class="chip">만족</span> <span class="chip">배송</span> <span class="chip">편하다</span></div></div><div class="promo consider">
+          <div class="promo-head"><span class="badge consider">△ 추진 검토</span>
+            <span class="pname">[단종]이유즈 BLDC 드라이기</span></div>
+          <div class="promo-meta">★4.60 · 긍정 90.9% · 리뷰 55 · 기타</div>
+          <div class="chips"><span class="chip">예쁘다</span> <span class="chip">가볍다</span> <span class="chip">만족</span> <span class="chip">편하다</span></div></div><div class="promo consider">
+          <div class="promo-head"><span class="badge consider">△ 추진 검토</span>
+            <span class="pname">클리어 슬라이딩 수납침대</span></div>
+          <div class="promo-meta">★4.60 · 긍정 92.5% · 리뷰 53 · 수납/정리</div>
+          <div class="chips"><span class="chip">만족</span> <span class="chip">튼튼하다</span> <span class="chip">배송</span> <span class="chip">깔끔하다</span></div></div>
+</section>
+
+<section>
+  <h2><span class="num">5</span> 동일 카테고리 유사상품 추천</h2>
+  <div class="card">
+          <div class="rec-head">기준 상품: <b>별도_브리타 추가 필터</b>
+            <span class="muted">[생활가전] 만족, 배송, 저렴/가성비</span></div>
+          <ul class="rec-list"><li><b>거치형 고속충전 케이블</b> — ★5.00, 리뷰 21 <span class="muted">(공통: 만족, 배송, 저렴/가성비)</span></li><li><b>철푸덕 오리 무드등</b> — ★5.00, 리뷰 29 <span class="muted">(공통: 만족, 배송, 저렴/가성비)</span></li><li><b>티포트 모음집</b> — ★5.00, 리뷰 24 <span class="muted">(공통: 만족, 배송, 저렴/가성비)</span></li><li><b>LED 네온사인 무드등</b> — ★4.92, 리뷰 64 <span class="muted">(공통: 만족, 배송, 저렴/가성비)</span></li><li><b>눈부심없는 플리츠 센서등</b> — ★4.92, 리뷰 25 <span class="muted">(공통: 만족, 배송, 저렴/가성비)</span></li></ul></div><div class="card">
+          <div class="rec-head">기준 상품: <b>4000W 큐브 멀티탭</b>
+            <span class="muted">[생활가전] 깔끔하다, 만족, 예쁘다, 튼튼하다, 편하다</span></div>
+          <ul class="rec-list"><li><b>무선충전 알람시계 모음</b> — ★4.74, 리뷰 23 <span class="muted">(공통: 깔끔하다, 만족, 예쁘다, 튼튼하다, 편하다)</span></li><li><b>전자레인지 폭조절 선반</b> — ★4.48, 리뷰 132 <span class="muted">(공통: 깔끔하다, 만족, 예쁘다, 튼튼하다, 편하다)</span></li><li><b>파스텔 필터&amp;수압 샤워기</b> — ★4.97, 리뷰 34 <span class="muted">(공통: 깔끔하다, 만족, 예쁘다, 편하다)</span></li><li><b>에피노 장스탠드 조명</b> — ★4.95, 리뷰 20 <span class="muted">(공통: 만족, 예쁘다, 튼튼하다, 편하다)</span></li><li><b>아이디바 삼각 멀티탭</b> — ★4.91, 리뷰 22 <span class="muted">(공통: 깔끔하다, 만족, 예쁘다, 편하다)</span></li></ul></div><div class="card">
+          <div class="rec-head">기준 상품: <b>썸머캔디 여름 침구 모음</b>
+            <span class="muted">[침구/매트리스] 가볍다, 만족, 배송, 시원하다, 예쁘다</span></div>
+          <ul class="rec-list"><li><b>헤이즐 린넨시어서커 침구</b> — ★5.00, 리뷰 24 <span class="muted">(공통: 가볍다, 만족, 배송, 시원하다, 예쁘다)</span></li><li><b>시어서커 여름 차렵 침구</b> — ★4.81, 리뷰 77 <span class="muted">(공통: 가볍다, 만족, 배송, 시원하다, 예쁘다)</span></li><li><b>써머쿨링 냉감 여름이불</b> — ★4.68, 리뷰 497 <span class="muted">(공통: 가볍다, 만족, 배송, 시원하다, 예쁘다)</span></li><li><b>유어메이트 냉감 여름이불</b> — ★4.63, 리뷰 317 <span class="muted">(공통: 가볍다, 만족, 배송, 시원하다, 예쁘다)</span></li><li><b>순면 등받이쿠션 5종</b> — ★5.00, 리뷰 22 <span class="muted">(공통: 만족, 배송, 시원하다, 예쁘다)</span></li></ul></div><div class="card">
+          <div class="rec-head">기준 상품: <b>책모형 수납 박스 18종</b>
+            <span class="muted">[수납/정리] 깔끔하다, 만족, 배송, 예쁘다</span></div>
+          <ul class="rec-list"><li><b>강화유리 모듈선반 4종</b> — ★4.91, 리뷰 23 <span class="muted">(공통: 깔끔하다, 만족, 배송, 예쁘다)</span></li><li><b>카델린 LED 수납침대</b> — ★4.87, 리뷰 23 <span class="muted">(공통: 깔끔하다, 만족, 배송, 예쁘다)</span></li><li><b>폴딩선반 전신거울 화장대</b> — ★4.83, 리뷰 59 <span class="muted">(공통: 깔끔하다, 만족, 배송, 예쁘다)</span></li><li><b>벨리타 침대틈새 수납선반</b> — ★4.76, 리뷰 21 <span class="muted">(공통: 깔끔하다, 만족, 배송, 예쁘다)</span></li><li><b>올인원 심플 행거</b> — ★4.76, 리뷰 42 <span class="muted">(공통: 깔끔하다, 만족, 배송, 예쁘다)</span></li></ul></div><div class="card">
+          <div class="rec-head">기준 상품: <b>원룸만들기 티셔츠2탄 4종</b>
+            <span class="muted">[기타] 깔끔하다, 만족, 시원하다, 예쁘다, 편하다</span></div>
+          <ul class="rec-list"><li><b>워터팝 물때제거 클리너</b> — ★4.91, 리뷰 22 <span class="muted">(공통: 깔끔하다, 만족, 시원하다, 예쁘다, 편하다)</span></li><li><b>틈새보관 플립 인덕션 2구</b> — ★5.00, 리뷰 24 <span class="muted">(공통: 깔끔하다, 만족, 예쁘다, 편하다)</span></li><li><b>글로우 스티커형 시트지</b> — ★5.00, 리뷰 21 <span class="muted">(공통: 깔끔하다, 만족, 예쁘다, 편하다)</span></li><li><b>스테인리스 소스볼 11종</b> — ★5.00, 리뷰 33 <span class="muted">(공통: 깔끔하다, 만족, 예쁘다, 편하다)</span></li><li><b>한성 타일 카페트</b> — ★5.00, 리뷰 23 <span class="muted">(공통: 깔끔하다, 만족, 예쁘다, 편하다)</span></li></ul></div><div class="card">
+          <div class="rec-head">기준 상품: <b>스테인리스 소스볼 11종</b>
+            <span class="muted">[기타] 깔끔하다, 만족, 배송, 예쁘다, 편하다</span></div>
+          <ul class="rec-list"><li><b>틈새보관 플립 인덕션 2구</b> — ★5.00, 리뷰 24 <span class="muted">(공통: 깔끔하다, 만족, 배송, 예쁘다, 편하다)</span></li><li><b>접이식 소파베드</b> — ★4.90, 리뷰 21 <span class="muted">(공통: 깔끔하다, 만족, 배송, 예쁘다, 편하다)</span></li><li><b>프랑코 자석 우산꽂이</b> — ★4.89, 리뷰 81 <span class="muted">(공통: 깔끔하다, 만족, 배송, 예쁘다, 편하다)</span></li><li><b>DIY 타일 카페트</b> — ★4.86, 리뷰 678 <span class="muted">(공통: 깔끔하다, 만족, 배송, 예쁘다, 편하다)</span></li><li><b>올리 빅아이스볼 제빙기</b> — ★4.85, 리뷰 20 <span class="muted">(공통: 깔끔하다, 만족, 배송, 예쁘다, 편하다)</span></li></ul></div>
+</section>
+
+<section>
+  <h2><span class="num">6</span> 부정 리뷰 상품 심층 분석</h2>
+  <div class="card neg-card">
+          <div class="rec-head"><b>롱베개 바디필로우 모음</b>
+            <span class="muted">[침구/매트리스]</span>
+            <span class="badge danger">★3.18</span></div>
+          <div class="promo-meta">부정비율 53.6% · 부정리뷰 10건 / 총 28건</div>
+          <div class="chips"><span class="chip neg">환불/반품 <b>1</b></span> <span class="chip neg">색상다름 <b>1</b></span> <span class="chip neg">고장/작동 <b>1</b></span></div>
+          <ul class="rec-list samples"><li>“흠… 다음엔 더 좋은 상품 기대하겠습니다.”</li><li>“나쁘진 않은데 추천하긴 애매해요”</li><li>“너무 납작. 베개로 쓰기에도 납작한데 바디필로우라뇨”</li></ul></div><div class="card neg-card">
+          <div class="rec-head"><b>가림막 무볼트 행거</b>
+            <span class="muted">[수납/정리]</span>
+            <span class="badge danger">★3.27</span></div>
+          <div class="promo-meta">부정비율 54.5% · 부정리뷰 7건 / 총 22건</div>
+          <div class="chips"><span class="chip neg">약하다/헐거움 <b>3</b></span> <span class="chip neg">파손/깨짐 <b>1</b></span> <span class="chip neg">작다 <b>1</b></span></div>
+          <ul class="rec-list samples"><li>“ㅠㅠ이거 너무 약해요 아이옷 몇개 걸었는데 휘어지고 기울고 뭐지ㅠㅠ 두개나 샀는데 너무 후회되요 두개 가격이면 그냥 튼튼한 장롱 살껄 그랬어요 저렴이장롱 ㅠ 어따 써요 너무너무 약함. (2024-02-07 07:23:54 에 등록된 네이버 페이 구매평)”</li><li>“쓰레기임 약해서 몇개 걸지도 못하고 밑에도요 두개나 샀는데 ㅠㅠ 후회됩니다 너~~무약함 장식품으로 구매하시는거 아니면 비추입니다 다~~ 빠지고 휘고 장난 아님 ㅠ (2024-03-14 07:29:39 에 등록된 네이버 페이 구매평)”</li><li>“진짜 돈아까워 죽을거같아요 튼튼하지도않고 계속 빠지고 부러지고 난리났네요 (브이리뷰로 작성된 리뷰입니다.)”</li></ul></div><div class="card neg-card">
+          <div class="rec-head"><b>계단확장 화장대 정리함</b>
+            <span class="muted">[수납/정리]</span>
+            <span class="badge danger">★3.32</span></div>
+          <div class="promo-meta">부정비율 50.0% · 부정리뷰 10건 / 총 28건</div>
+          <div class="chips"></div>
+          <ul class="rec-list samples"><li>“내구성도 안좋고 아이브로우도 안들어가는 크기라 당황스러웠네요 (2025-12-24 16:03:22 에 등록된 네이버 페이 구매평)”</li><li>“솔직히 1점도 아까워요... 틈새 화장대 쓰고 있어서 쇼츠보고 구매했는데 영상처럼 쓸려고 하면 뒤쪽 빈공간에 물건 높이가 조금만 높거나 채워넣어도 어디 걸려서 안 펼쳐집니다ㅠㅠ 양면테이프 고정력은 인정합니다ㅎ 물건이 많아서 유용하게 쓰지는 못 할 것 같아서 고정한거 제거하니 서랍장 페인트칠 뜯어졌습니다 하하”</li><li>“생각했던거랑 좀 달라서 아쉬워요”</li></ul></div><div class="card neg-card">
+          <div class="rec-head"><b>물 넘침 방지 얼음틀</b>
+            <span class="muted">[기타]</span>
+            <span class="badge danger">★3.48</span></div>
+          <div class="promo-meta">부정비율 38.1% · 부정리뷰 7건 / 총 21건</div>
+          <div class="chips"></div>
+          <ul class="rec-list samples"><li>“잘안빠져요. 여름템으로 엄청기대하고삿는데.ㅠ.ㅠ뱐품하는게 귀차나 걍 잘안되도 어떻게든쓰는 스탈이라 ..다이소얼음틀이훨씬 낫겟어요.이천원짜리.넘기대이하입니다. 어름틀에 이만큼돈쓴게 너무돈아까운 사람요..”</li><li>“얼음 안빠져요. ㅠㅠ 걍 다이소꺼 다시 씁니다. 이거 유튜브보고 산건데 진짜 넘 원망스러음 (2024-06-24 16:14:51 에 등록된 네이버 페이 구매평)”</li><li>“1. 물넘치지 말라고 높이 만들어났는데 칸막이는 낮아서 얼음이 한덩어리가됨 2. 틀 자체가 단단해서 비틀수도 없어서 얼음 못꺼냄 3. 바닥 실리콘 바로꺼내면 플라스틱과 다름이 없음 안눌림 그냥 얼음이 안빠짐”</li></ul></div><div class="card neg-card">
+          <div class="rec-head"><b>올인홈 높이조절 테이블</b>
+            <span class="muted">[기타]</span>
+            <span class="badge danger">★3.49</span></div>
+          <div class="promo-meta">부정비율 43.1% · 부정리뷰 21건 / 총 72건</div>
+          <div class="chips"></div>
+          <ul class="rec-list samples"><li>“상판이 까져서 와서 다시보내주신다고는했는데 일을 두번시키니 쫌..”</li><li>“흠… 다음엔 더 좋은 상품 기대하겠습니다.”</li><li>“흠… 기대 이하에요”</li></ul></div><div class="card neg-card">
+          <div class="rec-head"><b>자취수건 10P세트</b>
+            <span class="muted">[욕실/화장실]</span>
+            <span class="badge danger">★3.55</span></div>
+          <div class="promo-meta">부정비율 38.3% · 부정리뷰 16건 / 총 47건</div>
+          <div class="chips"><span class="chip neg">환불/반품 <b>2</b></span> <span class="chip neg">불량 <b>1</b></span> <span class="chip neg">배송지연 <b>1</b></span> <span class="chip neg">가격불만 <b>1</b></span></div>
+          <ul class="rec-list samples"><li>“원룸 여기에서 파는 건 질이 다 별로인건가 생각이 들정도... 가입하고 2개 삿는데 둘다 별로네 싼게 비지떡이고요 털빠짐 심함 그냥 수건은 비싼거 쓰는걸로...0”</li><li>“흠… 기대 이하에요”</li><li>“이건 내가 세탁을 잘 못한건가....5번을 빨아도 온몸에 털이 붙어서 오스트랄로피테쿠스 체험을 한달동안 하다가 도저히 안되서 새로운 수건을 사버렸다... (2025-12-30 15:02:32 에 등록된 네이버 페이 구매평)”</li></ul></div><div class="card neg-card">
+          <div class="rec-head"><b>셀프설치 창문 바람막이</b>
+            <span class="muted">[기타]</span>
+            <span class="badge danger">★3.61</span></div>
+          <div class="promo-meta">부정비율 36.8% · 부정리뷰 12건 / 총 38건</div>
+          <div class="chips"><span class="chip neg">약하다/헐거움 <b>2</b></span> <span class="chip neg">불량 <b>1</b></span></div>
+          <ul class="rec-list samples"><li>“너무 별로네요 투명도가 아쉽네요 (2024-12-22 14:50:47 에 등록된 네이버 페이 구매평)”</li><li>“사지마세요진짜제발사지마세요 돈받고도못할노동; (브이리뷰로 작성된 리뷰입니다.)”</li><li>“아이디어는 괜찮지만 상품 퀄리티가 너무 후져요... 받아보고 설치 안하고 두고 있습니다. (2025-02-13 16:46:49 에 등록된 네이버 페이 구매평)”</li></ul></div><div class="card neg-card">
+          <div class="rec-head"><b>마티나 전신거울 화장대</b>
+            <span class="muted">[인테리어/소품]</span>
+            <span class="badge danger">★3.67</span></div>
+          <div class="promo-meta">부정비율 37.2% · 부정리뷰 26건 / 총 94건</div>
+          <div class="chips"><span class="chip neg">배송지연 <b>8</b></span> <span class="chip neg">환불/반품 <b>2</b></span> <span class="chip neg">파손/깨짐 <b>1</b></span></div>
+          <ul class="rec-list samples"><li>“배달이 한달째 안되는게 말이 안되는데 배송완료됐다고 표시는 왜 해둬서 바로 취소도 못하게하고 카톡 고객센터는 답도 안할거면서 폼으로 열어두고 전화로는 업체에 확인이 필요허다면서 전체환불 보장도 못해주고 원룸만들기에서는 뭘하는겁니까?”</li><li>“나쁘진 않은데 추천하긴 애매해요”</li><li>“오지 않았는데 배송완료라고만 하고 1달이 되어가는데도 오지 않네요 문의 남겨도 연락도 없고 차라리 취소해주세요”</li></ul></div>
+</section>
+
+<section>
+  <h2><span class="num">7</span> 공급사별 리뷰 현황</h2>
+  <div class="tbl-scroll"><table><thead><tr><th>공급사</th><th>상품수</th><th>리뷰수</th><th>평균평점</th><th>긍정비율</th><th>포토비율</th></tr></thead><tbody><tr><td>제로엑스코퍼레이션</td><td>58</td><td>8,202</td><td>★4.64</td><td>90.4%</td><td>29.7%</td></tr><tr><td>도어스몰</td><td>19</td><td>6,638</td><td>★4.72</td><td>92.5%</td><td>30.4%</td></tr><tr><td>디뷰코리아</td><td>5</td><td>5,436</td><td>★4.48</td><td>85.6%</td><td>32.0%</td></tr><tr><td>에멜시</td><td>11</td><td>4,906</td><td>★4.64</td><td>87.4%</td><td>25.0%</td></tr><tr><td>오아</td><td>143</td><td>3,816</td><td>★4.64</td><td>88.6%</td><td>34.8%</td></tr><tr><td>데코원</td><td>51</td><td>3,797</td><td>★4.63</td><td>89.5%</td><td>21.9%</td></tr><tr><td>MF매직하우스</td><td>28</td><td>3,557</td><td>★4.82</td><td>95.7%</td><td>35.8%</td></tr><tr><td>바나나빌딩</td><td>110</td><td>3,399</td><td>★4.59</td><td>88.1%</td><td>32.5%</td></tr><tr><td>옵티</td><td>141</td><td>3,306</td><td>★4.67</td><td>92.1%</td><td>35.3%</td></tr><tr><td>에픽컴퍼니</td><td>24</td><td>3,266</td><td>★4.71</td><td>93.0%</td><td>35.6%</td></tr><tr><td>주루주루</td><td>14</td><td>2,783</td><td>★4.65</td><td>86.2%</td><td>18.2%</td></tr><tr><td>스토리로드</td><td>23</td><td>2,604</td><td>★4.81</td><td>94.1%</td><td>40.9%</td></tr><tr><td>모나코올리브</td><td>136</td><td>2,551</td><td>★4.53</td><td>86.1%</td><td>29.2%</td></tr><tr><td>아이홈즈</td><td>17</td><td>2,441</td><td>★4.67</td><td>91.1%</td><td>31.6%</td></tr><tr><td>더에이비오</td><td>20</td><td>2,270</td><td>★4.62</td><td>90.3%</td><td>28.6%</td></tr><tr><td>일루일루</td><td>29</td><td>2,165</td><td>★4.48</td><td>83.7%</td><td>30.3%</td></tr><tr><td>리샘</td><td>29</td><td>2,105</td><td>★4.51</td><td>85.8%</td><td>32.0%</td></tr><tr><td>데몬하우스</td><td>7</td><td>2,031</td><td>★4.50</td><td>87.0%</td><td>26.3%</td></tr><tr><td>무아스</td><td>55</td><td>1,881</td><td>★4.57</td><td>88.3%</td><td>31.1%</td></tr><tr><td>리체</td><td>36</td><td>1,752</td><td>★4.71</td><td>92.5%</td><td>34.1%</td></tr></tbody></table></div>
+</section>
+
+<section>
+  <h2><span class="num">8</span> PB화 고객 니즈 분석 · 상품 추천</h2>
+  <div class="card pb-card">
+          <div class="rec-head"><span class="badge pb">니즈</span> <b>감성/인테리어</b>
+            <span class="muted">언급 10,126건</span></div>
+          <div class="promo-meta">유망 카테고리: 기타, 인테리어/소품, 주방/식기</div>
+          <div class="muted small">긍정 리뷰 10126건에서 &#x27;감성/인테리어&#x27; 니즈가 반복 → 기타, 인테리어/소품, 주방/식기 카테고리에서 PB 상품화 검토 유망</div>
+          <ul class="rec-list"><li>대용량 에어프라이어 오븐</li><li>진공 음식물 쓰레기통</li><li>유어메이트 워싱 차렵이불</li><li>봉투밀착 밀폐 센서휴지통</li><li>상품 1917</li></ul></div><div class="card pb-card">
+          <div class="rec-head"><span class="badge pb">니즈</span> <b>가성비 니즈</b>
+            <span class="muted">언급 9,755건</span></div>
+          <div class="promo-meta">유망 카테고리: 기타, 청소/세탁, 침구/매트리스</div>
+          <div class="muted small">긍정 리뷰 9755건에서 &#x27;가성비 니즈&#x27; 니즈가 반복 → 기타, 청소/세탁, 침구/매트리스 카테고리에서 PB 상품화 검토 유망</div>
+          <ul class="rec-list"><li>330W 흡입력 괴물 청소기</li><li>디스이즈 디퓨저</li><li>유어메이트 워싱 차렵이불</li><li>상품 498</li><li>추가_330W 청소기 추가상품</li></ul></div><div class="card pb-card">
+          <div class="rec-head"><span class="badge pb">니즈</span> <b>1인가구</b>
+            <span class="muted">언급 8,169건</span></div>
+          <div class="promo-meta">유망 카테고리: 기타, 수납/정리, 청소/세탁</div>
+          <div class="muted small">긍정 리뷰 8169건에서 &#x27;1인가구&#x27; 니즈가 반복 → 기타, 수납/정리, 청소/세탁 카테고리에서 PB 상품화 검토 유망</div>
+          <ul class="rec-list"><li>330W 흡입력 괴물 청소기</li><li>상품 1417</li><li>못없이 설치하는 브라켓</li><li>무볼트 드레스룸 행거</li><li>상품 498</li></ul></div><div class="card pb-card">
+          <div class="rec-head"><span class="badge pb">니즈</span> <b>공간활용/미니멀</b>
+            <span class="muted">언급 7,729건</span></div>
+          <div class="promo-meta">유망 카테고리: 기타, 수납/정리, 청소/세탁</div>
+          <div class="muted small">긍정 리뷰 7729건에서 &#x27;공간활용/미니멀&#x27; 니즈가 반복 → 기타, 수납/정리, 청소/세탁 카테고리에서 PB 상품화 검토 유망</div>
+          <ul class="rec-list"><li>대용량 화장품 정리함</li><li>330W 흡입력 괴물 청소기</li><li>슬라이딩 거울 화장대</li><li>이동식 바지걸이 행거</li><li>문걸이 선반 모음</li></ul></div><div class="card pb-card">
+          <div class="rec-head"><span class="badge pb">니즈</span> <b>여름/시원함</b>
+            <span class="muted">언급 7,397건</span></div>
+          <div class="promo-meta">유망 카테고리: 기타, 침구/매트리스, 계절가전</div>
+          <div class="muted small">긍정 리뷰 7397건에서 &#x27;여름/시원함&#x27; 니즈가 반복 → 기타, 침구/매트리스, 계절가전 카테고리에서 PB 상품화 검토 유망</div>
+          <ul class="rec-list"><li>BLDC 급속냉각 선풍기</li><li>더 폭신 듀라픽셀 쿨패드</li><li>폭신한 듀라론 쿨패드</li><li>더커진 냉각 손선풍기</li><li>써머쿨링 냉감 여름이불</li></ul></div><div class="card pb-card">
+          <div class="rec-head"><span class="badge pb">니즈</span> <b>겨울/보온</b>
+            <span class="muted">언급 6,375건</span></div>
+          <div class="promo-meta">유망 카테고리: 기타, 침구/매트리스, 인테리어/소품</div>
+          <div class="muted small">긍정 리뷰 6375건에서 &#x27;겨울/보온&#x27; 니즈가 반복 → 기타, 침구/매트리스, 인테리어/소품 카테고리에서 PB 상품화 검토 유망</div>
+          <ul class="rec-list"><li>더버한일 워셔블 탄소매트</li><li>반반 매트리스 토퍼 10cm</li><li>집순이 탈부착 후드 담요</li><li>유어메이트 워싱 차렵이불</li><li>북극곰 양면 토퍼 13cm</li></ul></div>
+</section>
+
+<footer>
+  본 리포트는 카페24 상품후기 게시판 데이터를 자동 수집·분석해 생성됩니다.
+  긍정=평점 4점 이상, 부정=2점 이하. 키워드는 경량 한국어 사전 기반 표면형 매칭.
+  적극 추진/추진 검토 기준 및 공동구매 제외 목록은 <code>config.json</code> 에서 조정할 수 있습니다.
+</footer>
+</div>
+<script>
+const D = {"rating": {"1": 7504, "2": 2756, "3": 18412, "4": 19397, "5": 196742}, "monthly": [{"month": "2019-01", "count": 1739, "avg": 4.45, "photo_ratio": 0.1645}, {"month": "2019-02", "count": 2220, "avg": 4.54, "photo_ratio": 0.15}, {"month": "2019-03", "count": 2022, "avg": 4.45, "photo_ratio": 0.1142}, {"month": "2019-04", "count": 1595, "avg": 4.47, "photo_ratio": 0.1542}, {"month": "2019-05", "count": 2874, "avg": 4.56, "photo_ratio": 0.1667}, {"month": "2019-06", "count": 2655, "avg": 4.48, "photo_ratio": 0.1563}, {"month": "2019-07", "count": 2926, "avg": 4.5, "photo_ratio": 0.1517}, {"month": "2019-08", "count": 2746, "avg": 4.5, "photo_ratio": 0.1475}, {"month": "2019-09", "count": 2925, "avg": 4.48, "photo_ratio": 0.1497}, {"month": "2019-10", "count": 3668, "avg": 4.5, "photo_ratio": 0.1685}, {"month": "2019-11", "count": 3330, "avg": 4.55, "photo_ratio": 0.1883}, {"month": "2019-12", "count": 3332, "avg": 4.51, "photo_ratio": 0.1558}, {"month": "2020-01", "count": 2551, "avg": 4.5, "photo_ratio": 0.1721}, {"month": "2020-02", "count": 4052, "avg": 4.52, "photo_ratio": 0.1538}, {"month": "2020-03", "count": 5183, "avg": 4.54, "photo_ratio": 0.2435}, {"month": "2020-04", "count": 4193, "avg": 4.55, "photo_ratio": 0.2602}, {"month": "2020-05", "count": 4087, "avg": 4.54, "photo_ratio": 0.2716}, {"month": "2020-06", "count": 4093, "avg": 4.51, "photo_ratio": 0.2873}, {"month": "2020-07", "count": 3943, "avg": 4.46, "photo_ratio": 0.3327}, {"month": "2020-08", "count": 3678, "avg": 4.53, "photo_ratio": 0.292}, {"month": "2020-09", "count": 3732, "avg": 4.56, "photo_ratio": 0.3181}, {"month": "2020-10", "count": 3542, "avg": 4.6, "photo_ratio": 0.2942}, {"month": "2020-11", "count": 4156, "avg": 4.63, "photo_ratio": 0.2803}, {"month": "2020-12", "count": 4955, "avg": 4.73, "photo_ratio": 0.3066}, {"month": "2021-01", "count": 4520, "avg": 4.69, "photo_ratio": 0.3347}, {"month": "2021-02", "count": 3531, "avg": 4.71, "photo_ratio": 0.3512}, {"month": "2021-03", "count": 3360, "avg": 4.67, "photo_ratio": 0.3396}, {"month": "2021-04", "count": 3144, "avg": 4.68, "photo_ratio": 0.3747}, {"month": "2021-05", "count": 2789, "avg": 4.67, "photo_ratio": 0.3503}, {"month": "2021-06", "count": 2981, "avg": 4.66, "photo_ratio": 0.3207}, {"month": "2021-07", "count": 3549, "avg": 4.61, "photo_ratio": 0.3404}, {"month": "2021-08", "count": 3038, "avg": 4.64, "photo_ratio": 0.3364}, {"month": "2021-09", "count": 3096, "avg": 4.68, "photo_ratio": 0.3327}, {"month": "2021-10", "count": 3140, "avg": 4.69, "photo_ratio": 0.3637}, {"month": "2021-11", "count": 2254, "avg": 4.69, "photo_ratio": 0.3217}, {"month": "2021-12", "count": 2339, "avg": 4.68, "photo_ratio": 0.4002}, {"month": "2022-01", "count": 2038, "avg": 4.73, "photo_ratio": 0.4028}, {"month": "2022-02", "count": 2049, "avg": 4.69, "photo_ratio": 0.4285}, {"month": "2022-03", "count": 2870, "avg": 4.75, "photo_ratio": 0.3997}, {"month": "2022-04", "count": 1986, "avg": 4.71, "photo_ratio": 0.3847}, {"month": "2022-05", "count": 1706, "avg": 4.72, "photo_ratio": 0.3628}, {"month": "2022-06", "count": 2104, "avg": 4.74, "photo_ratio": 0.4002}, {"month": "2022-07", "count": 2239, "avg": 4.69, "photo_ratio": 0.4551}, {"month": "2022-08", "count": 1533, "avg": 4.68, "photo_ratio": 0.3796}, {"month": "2022-09", "count": 984, "avg": 4.75, "photo_ratio": 0.4228}, {"month": "2022-10", "count": 739, "avg": 4.75, "photo_ratio": 0.3627}, {"month": "2022-11", "count": 891, "avg": 4.76, "photo_ratio": 0.4646}, {"month": "2022-12", "count": 1023, "avg": 4.75, "photo_ratio": 0.4409}, {"month": "2023-01", "count": 624, "avg": 4.79, "photo_ratio": 0.4343}, {"month": "2023-02", "count": 1343, "avg": 4.71, "photo_ratio": 0.3909}, {"month": "2023-03", "count": 2281, "avg": 4.72, "photo_ratio": 0.3954}, {"month": "2023-04", "count": 1801, "avg": 4.7, "photo_ratio": 0.367}, {"month": "2023-05", "count": 909, "avg": 4.61, "photo_ratio": 0.3817}, {"month": "2023-06", "count": 695, "avg": 4.55, "photo_ratio": 0.3122}, {"month": "2023-07", "count": 887, "avg": 4.64, "photo_ratio": 0.3495}, {"month": "2023-08", "count": 969, "avg": 4.6, "photo_ratio": 0.3756}, {"month": "2023-09", "count": 994, "avg": 4.65, "photo_ratio": 0.4014}, {"month": "2023-10", "count": 1105, "avg": 4.69, "photo_ratio": 0.4}, {"month": "2023-11", "count": 1337, "avg": 4.72, "photo_ratio": 0.3904}, {"month": "2023-12", "count": 1528, "avg": 4.69, "photo_ratio": 0.445}, {"month": "2024-01", "count": 1845, "avg": 4.64, "photo_ratio": 0.4526}, {"month": "2024-02", "count": 1592, "avg": 4.72, "photo_ratio": 0.434}, {"month": "2024-03", "count": 1253, "avg": 4.71, "photo_ratio": 0.4214}, {"month": "2024-04", "count": 1145, "avg": 4.74, "photo_ratio": 0.4533}, {"month": "2024-05", "count": 1449, "avg": 4.69, "photo_ratio": 0.4879}, {"month": "2024-06", "count": 3162, "avg": 4.66, "photo_ratio": 0.2388}, {"month": "2024-07", "count": 2318, "avg": 4.65, "photo_ratio": 0.28}, {"month": "2024-08", "count": 1928, "avg": 4.68, "photo_ratio": 0.3449}, {"month": "2024-09", "count": 1365, "avg": 4.76, "photo_ratio": 0.4147}, {"month": "2024-10", "count": 1910, "avg": 4.75, "photo_ratio": 0.3319}, {"month": "2024-11", "count": 2533, "avg": 4.72, "photo_ratio": 0.3044}, {"month": "2024-12", "count": 2607, "avg": 4.72, "photo_ratio": 0.2781}, {"month": "2025-01", "count": 2218, "avg": 4.7, "photo_ratio": 0.28}, {"month": "2025-02", "count": 3210, "avg": 4.73, "photo_ratio": 0.2364}, {"month": "2025-03", "count": 3287, "avg": 4.67, "photo_ratio": 0.0405}, {"month": "2025-04", "count": 2786, "avg": 4.67, "photo_ratio": 0.3212}, {"month": "2025-05", "count": 3093, "avg": 4.72, "photo_ratio": 0.3101}, {"month": "2025-06", "count": 3002, "avg": 4.72, "photo_ratio": 0.3474}, {"month": "2025-07", "count": 5124, "avg": 4.47, "photo_ratio": 0.3126}, {"month": "2025-08", "count": 3210, "avg": 4.56, "photo_ratio": 0.3947}, {"month": "2025-09", "count": 2999, "avg": 4.59, "photo_ratio": 0.3535}, {"month": "2025-10", "count": 3407, "avg": 4.57, "photo_ratio": 0.3452}, {"month": "2025-11", "count": 4294, "avg": 4.63, "photo_ratio": 0.3784}, {"month": "2025-12", "count": 4621, "avg": 4.59, "photo_ratio": 0.3993}, {"month": "2026-01", "count": 5141, "avg": 4.62, "photo_ratio": 0.4176}, {"month": "2026-02", "count": 4263, "avg": 4.55, "photo_ratio": 0.3465}, {"month": "2026-03", "count": 4260, "avg": 4.45, "photo_ratio": 0.3237}, {"month": "2026-04", "count": 3903, "avg": 4.56, "photo_ratio": 0.3741}, {"month": "2026-05", "count": 4547, "avg": 4.62, "photo_ratio": 0.369}, {"month": "2026-06", "count": 4869, "avg": 4.55, "photo_ratio": 0.3643}, {"month": "2026-07", "count": 897, "avg": 4.49, "photo_ratio": 0.3244}], "photo": {"photo": 76206, "non_photo": 168605, "ratio": 0.3113}, "pos_kw": [{"keyword": "만족", "count": 44946}, {"keyword": "예쁘다", "count": 19349}, {"keyword": "편하다", "count": 18186}, {"keyword": "배송", "count": 15945}, {"keyword": "깔끔하다", "count": 11235}, {"keyword": "저렴/가성비", "count": 10274}, {"keyword": "튼튼하다", "count": 8848}, {"keyword": "따뜻하다", "count": 5590}, {"keyword": "시원하다", "count": 5588}, {"keyword": "가볍다", "count": 4540}, {"keyword": "설치쉬움", "count": 2593}, {"keyword": "넉넉하다", "count": 1970}, {"keyword": "고급스럽다", "count": 1912}, {"keyword": "부드럽다", "count": 961}, {"keyword": "조용하다", "count": 487}], "neg_kw": [{"keyword": "환불/반품", "count": 1065}, {"keyword": "불편", "count": 377}, {"keyword": "파손/깨짐", "count": 372}, {"keyword": "불량", "count": 340}, {"keyword": "약하다/헐거움", "count": 322}, {"keyword": "고장/작동", "count": 283}, {"keyword": "냄새", "count": 232}, {"keyword": "배송지연", "count": 212}, {"keyword": "작다", "count": 160}, {"keyword": "소음", "count": 126}, {"keyword": "얇다", "count": 118}, {"keyword": "가격불만", "count": 82}, {"keyword": "색상다름", "count": 50}]};
+const css = getComputedStyle(document.documentElement);
+const ink = css.getPropertyValue('--ink').trim() || '#333';
+const grid = css.getPropertyValue('--line').trim() || '#eee';
+Chart.defaults.color = ink; Chart.defaults.borderColor = grid;
+Chart.defaults.font.family = '"Pretendard","Malgun Gothic",sans-serif';
+
+new Chart(ratingChart, {type:'bar',
+  data:{labels:Object.keys(D.rating).map(k=>k+'점'),
+    datasets:[{label:'리뷰 수',data:Object.values(D.rating),
+      backgroundColor:['#e5484d','#e8794d','#e8a33d','#8fbf50','#22a06b']}]},
+  options:{plugins:{legend:{display:false}},maintainAspectRatio:false}});
+
+new Chart(photoChart, {type:'doughnut',
+  data:{labels:['포토리뷰','일반리뷰'],
+    datasets:[{data:[D.photo.photo,D.photo.non_photo],
+      backgroundColor:['#4f6ef2','#d7dbe8']}]},
+  options:{maintainAspectRatio:false,cutout:'62%'}});
+
+new Chart(monthlyChart, {
+  data:{labels:D.monthly.map(m=>m.month),
+    datasets:[
+     {type:'bar',label:'리뷰 수',data:D.monthly.map(m=>m.count),
+       backgroundColor:'#4f6ef2',yAxisID:'y',order:2},
+     {type:'line',label:'평균평점',data:D.monthly.map(m=>m.avg),
+       borderColor:'#22a06b',backgroundColor:'#22a06b',tension:.3,yAxisID:'y1',order:1}]},
+  options:{maintainAspectRatio:false,
+    scales:{y:{position:'left',title:{display:true,text:'리뷰 수'}},
+      y1:{position:'right',min:0,max:5,grid:{drawOnChartArea:false},title:{display:true,text:'평균평점'}}}}});
+
+function kwBar(id,arr,color){
+  new Chart(id,{type:'bar',
+    data:{labels:arr.map(x=>x.keyword),
+      datasets:[{label:'리뷰 수',data:arr.map(x=>x.count),backgroundColor:color}]},
+    options:{indexAxis:'y',maintainAspectRatio:false,
+      plugins:{legend:{display:false}}}});
+}
+kwBar(posKwChart, D.pos_kw, '#22a06b');
+kwBar(negKwChart, D.neg_kw, '#e5484d');
+</script>
+</body></html>
